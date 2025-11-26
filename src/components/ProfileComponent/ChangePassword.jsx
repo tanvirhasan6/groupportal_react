@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { useUser } from "../context/UserContext"; // <-- adjust import based on your project
+import { useUser } from "../../context/UserContext"; // <-- adjust import based on your project
 
 const ChangePassword = () => {
 

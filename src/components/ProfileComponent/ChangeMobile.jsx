@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { useUser } from "../context/UserContext"; // <-- adjust path as needed
+import { useUser } from "../../context/UserContext"; // <-- adjust path as needed
 
 const ChangeMobile = () => {
 

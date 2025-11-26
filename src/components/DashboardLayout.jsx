@@ -4,8 +4,8 @@ import { Sidebar } from "./Sidebar";
 import { Outlet } from "react-router-dom";
 
 export default function DashboardLayout({ children, userInfo, onLogout }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   return (
     <div className="h-screen w-full bg-linear-to-br from-gray-900 via-gray-800 to-gray-950 text-white flex relative">

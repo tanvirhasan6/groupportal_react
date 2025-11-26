@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../../context/UserContext";
 import toast, { Toaster } from "react-hot-toast";
 
 const ChangeEmail = () => {

@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import DatePickerInput from "../components/MyDatePicker/DatePickerInput";
 import SearchableSelect from "../components/SearchableSelect";
+import { useUser } from "../context/UserContext"
 
-const ClaimForm = ({ user }) => {
+const ClaimForm = () => {
+
+    const user = useUser()
+
     const [prescriptionFiles, setPrescriptionFiles] = useState([]);
     const [testFiles, setTestFiles] = useState([]);
     const [receiptFiles, setReceiptFiles] = useState([]);
@@ -12,6 +16,7 @@ const ClaimForm = ({ user }) => {
 
     const [diseasesData, setDiseasesData] = useState([]);
     const [hospitalData, setHospitalData] = useState([]);
+    const [loading, setLoading] = useState(false)
 
     const [formData, setFormData] = useState({
         coverage: "",
@@ -142,10 +147,18 @@ const ClaimForm = ({ user }) => {
         setSlotData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`
+                `http://localhost:5001/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
             );
             const data = await res.json();
-            if (data?.status === 404) toast.error("No Slot Found");
+            if (data?.status === 404) {
+                console.log("No Slot Found");
+
+                toast.error("No Slot Found");
+            }
             else if (data?.status === 200) setSlotData(data.result);
             else toast.error(`Slot Error: ${data?.message}`);
         } catch (error) {
@@ -158,7 +171,11 @@ const ClaimForm = ({ user }) => {
         setBenefitData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}`
+                `http://localhost:5001/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
             );
             const data = await res.json();
             if (data?.status === 404) toast.error("No Benefit Found");
@@ -172,7 +189,11 @@ const ClaimForm = ({ user }) => {
     const diseasesList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/diseases`
+                `http://localhost:5001/api/grpclaimportal/claim/diseases`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
             );
             const data = await res.json();
             if (data?.status === 200) {
@@ -190,7 +211,11 @@ const ClaimForm = ({ user }) => {
     const hospitalList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/hospitals`
+                `http://localhost:5001/api/grpclaimportal/claim/hospitals`,
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
             );
             const data = await res.json();
             if (data?.status === 200) {
@@ -217,7 +242,58 @@ const ClaimForm = ({ user }) => {
         if (formData.coverage) getBenefitData();
     }, [formData.coverage]);
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+
+        if (formData.claimType) {
+
+            const today = new Date()
+            const minAllowedDate = new Date(today)
+
+            if (selectedSlot?.GRACE_PERIOD) minAllowedDate.setDate(today.getDate() - selectedSlot.GRACE_PERIOD)
+
+            setConsultMinDate(formData.claimType === "102" ? null : minAllowedDate)
+            setMinDischargeDate(formData.claimType === "103" ? null : minAllowedDate)
+
+        }
+
+    }, [formData.claimType, selectedSlot?.GRACE_PERIOD])
+
+    useEffect(() => {
+
+        if (formData.consultDate) {
+            const [day, month, year] = formData.consultDate.split("/").map(Number);
+            const dateObj = new Date(year, month - 1, day)
+            if (formData.claimType === '102') {
+                setMinAdmissionMinDate(dateObj)
+                setMinDischargeDate(dateObj)
+                setFormData(prev => ({
+                    ...prev,
+                    admissionDate: "",
+                    dischargeDate: "",
+                }))
+            }
+        }
+
+    }, [formData.consultDate])
+
+    useEffect(() => {
+
+        if (formData.admissionDate) {
+            const [day, month, year] = formData.admissionDate.split("/").map(Number);
+            const dateObj = new Date(year, month - 1, day)
+            if (formData.claimType === '102') {
+                setMinDischargeDate(dateObj)
+                setFormData(prev => ({
+                    ...prev,
+                    dischargeDate: "",
+                }))
+            }
+        }
+
+    }, [formData.admissionDate])
+
+    const handleSubmit = async (e) => {
+        setLoading(true)
         e.preventDefault();
 
         if (formData.claimType === "102" && dischargeFiles.length === 0) {
@@ -234,11 +310,45 @@ const ClaimForm = ({ user }) => {
 
         Object.keys(formData).forEach((k) => submissionData.append(k, formData[k]));
 
-        [...allSelectedFiles].forEach((file) =>
-            submissionData.append("files", file)
-        );
+        prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file));
+        dischargeFiles.forEach(file => submissionData.append("dischargeFiles", file));
+        testFiles.forEach(file => submissionData.append("testFiles", file));
+        receiptFiles.forEach(file => submissionData.append("receiptFiles", file));
+        otherFiles.forEach(file => submissionData.append("otherFiles", file));
 
-        console.log("Submitting: ", submissionData);
+        console.log("Form data claimType:", formData.claimType);
+
+        try {
+            const res = await fetch(
+                `http://localhost:5001/api/grpclaimportal/claim/submitClaim`,
+                {
+                    method: "POST",
+                    body: submissionData,
+                    credentials: "include",
+                    headers: {
+                        "x-claim-type": formData.claimType,
+                    },
+                }
+            )
+
+            const text = await res.text()
+            let data
+
+            try {
+                data = JSON.parse(text)
+            } catch {
+                console.error("Invalid JSON:", text)
+                return
+            }
+
+            console.log("Upload:", data?.message)
+
+            setLoading(false)
+
+        } catch (err) {
+            toast.error("Upload failed")
+            setLoading(false)
+        };
     };
 
     return (
@@ -368,7 +478,33 @@ const ClaimForm = ({ user }) => {
                         type="submit"
                         className="px-8 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-md shadow-md transition-all hover:scale-105"
                     >
-                        Apply
+                        {loading ? (
+                            <div className="flex items-center justify-center gap-2">
+                                <svg
+                                    className="animate-spin h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                    ></path>
+                                </svg>
+                                <span>Saving...</span>
+                            </div>
+                        ) : (
+                            'Apply'
+                        )}
                     </button>
                 </div>
             </form>

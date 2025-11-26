@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function Login( {onLogin} ) {
+export default function Login({ onLogin }) {
     const [screen, setScreen] = useState("login");
     const [userData, setUserData] = useState(null);
     const [password, setPassword] = useState("");
@@ -76,7 +76,7 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
             const data = await res.json();
 
             if (data?.status === 200) {
-               
+
                 onLogin(data.result || { USERNAME: userid });
 
                 // Navigate
@@ -120,7 +120,7 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                     <label className="text-sm text-gray-300">Password</label>
                     <input
                         type="password"
-                        placeholder="••••••••"
+                        placeholder="********"
                         className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-400 outline-none transition"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -135,7 +135,33 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                     type="submit"
                     className="w-full py-3 rounded-lg bg-linear-to-r from-cyan-500 to-fuchsia-500 hover:opacity-90 transition font-medium"
                 >
-                    {loading ? "Logging in..." : "Log In"}
+                    {loading ? (
+                        <div className="flex items-center justify-center gap-2">
+                            <svg
+                                className="animate-spin h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                ></path>
+                            </svg>
+                            <span>Logging in...</span>
+                        </div>
+                    ) : (
+                        'Log In'
+                    )}
                 </button>
             </form>
         </div>

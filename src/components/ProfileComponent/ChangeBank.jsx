@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";   // <-- update path if needed
+import { useUser } from "../../context/UserContext";   // <-- update path if needed
 import toast, { Toaster } from "react-hot-toast";
-import SearchableSelect from "./SearchableSelect"; // <-- update path
+import SearchableSelect from "../SearchableSelect"; // <-- update path
 
 const ChangeBank = () => {
     const user = useUser();

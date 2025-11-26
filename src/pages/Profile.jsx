@@ -4,10 +4,10 @@ import { useUser } from "../context/UserContext"
 import { FaCamera, FaEdit } from "react-icons/fa"
 import toast from "react-hot-toast"
 
-import ChangeEmail from "../components/ChangeEmail"
-import ChangeMobile from "../components/ChangeMobile"
-import ChangeBank from "../components/ChangeBank"
-import ChangePassword from "../components/ChangePassword"
+import ChangeEmail from "../components/ProfileComponent/ChangeEmail"
+import ChangeMobile from "../components/ProfileComponent/ChangeMobile"
+import ChangeBank from "../components/ProfileComponent/ChangeBank"
+import ChangePassword from "../components/ProfileComponent/ChangePassword"
 
 const ProfilePage = () => {
 
