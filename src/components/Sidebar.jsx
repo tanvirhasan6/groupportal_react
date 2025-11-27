@@ -21,9 +21,9 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     let menus;
 
     if (groupCode === "100") {
-        menus = ["Death Claim", "Manage", "Missing Info"];
+        menus = ["Death Claim", "Manage", "Missing Info", "FAQ"];
     } else if (groupCode === "0") {
-        menus = ["Profile", "New Claim", "Health Card"];
+        menus = ["Profile", "New Claim", "Health Card", "FAQ"];
     } else {
         menus = ["Profile", "Death Claim"];
     }
@@ -34,7 +34,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         "Health Card": <FaHeartbeat />,
         "Death Claim": <FaClipboardList />,
         "Manage": <FaCog />,
-        "Missing Info": <FaExclamationCircle />,
+        "FAQ": <FaQuestion />,
     };
 
     return (
@@ -85,12 +85,12 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     <FaHospital /> Hospitals
                 </Link>
 
-                <Link
+                {/* <Link
                     className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex flex-row gap-2 items-center"
                     to="/faq"
                 >
                     <FaQuestion /> F. A. Q
-                </Link>
+                </Link> */}
             </nav>
         </aside>
     );
