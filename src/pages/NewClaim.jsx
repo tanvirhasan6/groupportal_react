@@ -3,10 +3,12 @@ import toast, { Toaster } from "react-hot-toast";
 import DatePickerInput from "../components/MyDatePicker/DatePickerInput";
 import SearchableSelect from "../components/SearchableSelect";
 import { useUser } from "../context/UserContext"
+import { replace, useNavigate } from "react-router-dom";
 
 const ClaimForm = () => {
 
     const user = useUser()
+    const navigate =useNavigate()
 
     const [prescriptionFiles, setPrescriptionFiles] = useState([]);
     const [testFiles, setTestFiles] = useState([]);
@@ -25,8 +27,16 @@ const ClaimForm = () => {
         dischargeDate: "",
         claimType: "",
         disease: "",
+        diseaseName: "",
         hospital: "",
+        hospitalName: "",
         amount: "",
+        maxlimit: 0,
+        limitamount: 0,
+        plan: "",
+        ratio: 0,
+        expHead: "",
+        riskFrom: "",
     });
 
     const allSelectedFiles = [
@@ -306,49 +316,98 @@ const ClaimForm = () => {
             return;
         }
 
-        const submissionData = new FormData();
-
-        Object.keys(formData).forEach((k) => submissionData.append(k, formData[k]));
-
-        prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file));
-        dischargeFiles.forEach(file => submissionData.append("dischargeFiles", file));
-        testFiles.forEach(file => submissionData.append("testFiles", file));
-        receiptFiles.forEach(file => submissionData.append("receiptFiles", file));
-        otherFiles.forEach(file => submissionData.append("otherFiles", file));
-
-        console.log("Form data claimType:", formData.claimType);
-
         try {
-            const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/submitClaim`,
+            const validate = await fetch(
+                `http://localhost:5001/api/grpclaimportal/claim/validateClaim?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}&claimType=${formData.claimType}&coverage=${formData.coverage}`,
                 {
-                    method: "POST",
-                    body: submissionData,
+                    method: "GET",
                     credentials: "include",
-                    headers: {
-                        "x-claim-type": formData.claimType,
-                    },
                 }
             )
 
-            const text = await res.text()
-            let data
+            const data = await validate.json()
 
-            try {
-                data = JSON.parse(text)
-            } catch {
-                console.error("Invalid JSON:", text)
-                return
+            if (data?.status === 200) {
+                const res = data.result[0];
+
+                setFormData((prev) => ({
+                    ...prev,
+                    maxlimit: res.CLAIM_LIMIT,
+                    limitamount: res.REMAINING_BALANCE,
+                    plan: res.PLAN,
+                    ratio: res.BENEFIT_RATIO,
+                    expHead: res.EXP_HEAD,
+                    riskFrom: res.RISK_FROM
+                }))
+
+                if (formData.amount> res.REMAINING_BALANCE) return toast.error(`Exeed the Claim Amount Limit. Your Limit is ${res.REMAINING_BALANCE}`)
+
+                const submissionData = new FormData();
+
+                Object.keys(formData).forEach((k) => submissionData.append(k, formData[k]));
+
+                submissionData.set("maxlimit", res.REMAINING_BALANCE);
+                submissionData.set("limitamount", res.CLAIM_LIMIT);
+                submissionData.set("plan", res.PLAN);
+                submissionData.set("ratio", res.BENEFIT_RATIO);
+                submissionData.set("expHead", res.EXP_HEAD);
+                submissionData.set("riskFrom", res.RISK_FROM);
+
+                prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file));
+                dischargeFiles.forEach(file => submissionData.append("dischargeFiles", file));
+                testFiles.forEach(file => submissionData.append("testFiles", file));
+                receiptFiles.forEach(file => submissionData.append("receiptFiles", file));
+                otherFiles.forEach(file => submissionData.append("otherFiles", file));
+
+                try {
+                    const res = await fetch(
+                        `http://localhost:5001/api/grpclaimportal/claim/submitClaim`,
+                        {
+                            method: "POST",
+                            body: submissionData,
+                            credentials: "include",
+                            headers: {
+                                "x-claim-type": formData.claimType,
+                            },
+                        }
+                    )
+
+                    const text = await res.text()
+                    let data
+
+                    try {
+
+                        data = JSON.parse(text)
+                        console.log(data);
+                        toast.success('Calim Successfull')
+
+                        setTimeout(() => {
+                            navigate("/dashboard", { replace: true });
+                            return;
+                        }, 1000);
+
+                        
+                    } catch {
+                        console.error("Invalid JSON:", text)
+                        setLoading(false)
+                        return
+                    }
+
+                } catch (err) {
+                    toast.error("Upload failed")
+                    setLoading(false)
+                }
+
+            } else {
+                toast.error(`${data?.message}`)
+                setLoading(false)
             }
 
-            console.log("Upload:", data?.message)
-
+        } catch (error) {
+            toast.error(`${error}`)
             setLoading(false)
+        }
 
-        } catch (err) {
-            toast.error("Upload failed")
-            setLoading(false)
-        };
     };
 
     return (
@@ -442,7 +501,16 @@ const ClaimForm = () => {
                             label="Disease"
                             options={diseasesData}
                             value={formData.disease}
-                            onChange={(val) => setFormData(prev => ({ ...prev, disease: val }))}
+                            onChange={
+                                (val) => {
+                                    const selected = diseasesData.find(d => d.value === val)
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        disease: val,                 // CODE
+                                        diseaseName: selected?.label // DESCRIPTION
+                                    }))
+                                }
+                            }
                             placeholder="Select Disease"
                             disabled={false}
                             onFocus={(e) => e.target.select()}
@@ -454,7 +522,16 @@ const ClaimForm = () => {
                             label="Hospital"
                             options={hospitalData}
                             value={formData.hospital}
-                            onChange={(val) => setFormData(prev => ({ ...prev, hospital: val }))}
+                            onChange={
+                                (val) => {
+                                    const selected = hospitalData.find(d => d.value === val)
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        hospital: val,                 // CODE
+                                        hospitalName: selected?.label // DESCRIPTION
+                                    }))
+                                }
+                            }
                             placeholder="Select Hospital"
                             disabled={false}
                             onFocus={(e) => e.target.select()}
@@ -477,34 +554,37 @@ const ClaimForm = () => {
                     <button
                         type="submit"
                         className="px-8 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-md shadow-md transition-all hover:scale-105"
+                        disabled={loading}
                     >
-                        {loading ? (
-                            <div className="flex items-center justify-center gap-2">
-                                <svg
-                                    className="animate-spin h-5 w-5 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                    ></path>
-                                </svg>
-                                <span>Saving...</span>
-                            </div>
-                        ) : (
-                            'Apply'
-                        )}
+                        {
+                            loading ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <svg
+                                        className="animate-spin h-5 w-5 text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                        ></path>
+                                    </svg>
+                                    <span>Saving...</span>
+                                </div>
+                            ) : (
+                                'Apply'
+                            )
+                        }
                     </button>
                 </div>
             </form>

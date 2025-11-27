@@ -1,5 +1,6 @@
-import React, { useState, lazy, Suspense } from "react"
+import React, { useState, lazy, Suspense, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { io } from "socket.io-client"
 
 import { UserContext } from "./context/UserContext"
 const Login = lazy(() => import("./pages/Login"));
@@ -32,6 +33,33 @@ const getUserFromCookie = () => {
 export default function App() {
 
   const [userInfo, setUserInfo] = useState(getUserFromCookie())
+
+  // ----------------------------------------------------
+  // SINGLE TAB SOCKET PROTECTION
+  // ----------------------------------------------------
+  useEffect(() => {
+    if (!userInfo?.USERNAME) return;
+
+    const socket = io("http://localhost:5001", {
+      query: { 
+        userId: userInfo.USERNAME, 
+        clientApp: "claimPortal",
+      },
+      transports: ["websocket"],
+      reconnection: false,
+    });
+
+    socket.on("multiple_tabs_not_allowed", () => {
+      alert("Another tab is already open! This tab will be closed.");
+      socket.disconnect();
+      setUserInfo(null);
+      window.location.href = "/login";
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [userInfo]);
 
   const handleLogout = async () => {
     try {
