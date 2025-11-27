@@ -9,6 +9,7 @@ const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const ClaimsPage = lazy(() => import("./pages/NewClaim"));
 const FaqPage = lazy(() => import("./pages/Faq"));
+const HealthcardPage = lazy(() => import("./pages/Healthcard"));
 
 const Skeleton = () => (
   <div className="p-4 animate-pulse space-y-3">
@@ -107,7 +108,7 @@ export default function App() {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="newclaim" element={<ClaimsPage />} />
               
-              <Route path="HealthCard" element={<ClaimsPage />} />
+              <Route path="healthcard" element={<HealthcardPage />} />
               <Route path="DeathClaim" element={<ClaimsPage />} />
               <Route path="Manage" element={<ClaimsPage />} />
               <Route path="MissingInfo" element={<ClaimsPage />} />
