@@ -43,13 +43,13 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 } overflow-hidden flex flex-col z-40`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 bg-gray-400">
+            <div className="flex items-center justify-between px-5 py-4 text-sm">
                 <div className="flex flex-col items-center gap-3">
                     <img
                         src={`https://app.zenithlifebd.com/admin/img/${user?.POLICY_NO}.png`}
                         alt="User Logo"
                     />
-                    <h2 className={`text-xl font-semibold text-gray-600 ${sidebarOpen ? "" : "hidden"}`}>
+                    <h2 className={`font-semibold text-gray-400 ${sidebarOpen ? "" : "hidden"}`}>
                         {user?.ORGANIZATION}
                         <br />
                         ({user?.POLICY_NO})

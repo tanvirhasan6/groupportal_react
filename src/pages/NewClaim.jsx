@@ -394,7 +394,7 @@ const ClaimForm = () => {
                     }
 
                 } catch (err) {
-                    toast.error("Upload failed")
+                    toast.error(`Upload failed: ${err}`)
                     setLoading(false)
                 }
 
