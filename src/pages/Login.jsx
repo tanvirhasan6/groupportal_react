@@ -162,7 +162,11 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                     ) : (
                         'Log In'
                     )}
-                </button>
+                </button>               
+
+                <span className="text-xs text-red-400 text-justify">
+                    সকলের অবগতির জন্য জানানে যাচ্ছে যে, নিজ নামের ব্যাংক বা মোবাইল ব্যাংকিং একাউন্ট না দেয়া, ব্যাংক একাউন্টের নামে গড়মিল, ব্যাংক শাখার নামে গড়মিল, ভুল একাউন্ট নাম্বার, মোবাইল ব্যাংকিং একাউন্টের কেওয়াইসি আপডেট না থাকার কারণে অনেকের বীমা দাবির টাকা ফেরত চলে আসছে বা পরিশোধে বিলম্ব হচ্ছে। তাই নিজ নামের ব্যাংক একাউন্টের সঠিক তথ্য দেয়ার জন্য অনুরোধ করছি।
+                </span>
             </form>
         </div>
     );
@@ -372,6 +376,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
                 <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline">
                     Back
                 </button>
+                
             </form>
         </div>
     );
