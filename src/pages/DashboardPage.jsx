@@ -1,15 +1,24 @@
 import React from "react";
 import { useUser } from "../context/UserContext";
+import Beneficiary from "../components/HomeComponent/Beneficiary";
 
 export default function DashboardPage() {
   const user = useUser();
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg">
-      <h2 className="text-2xl font-semibold text-cyan-400 mb-4">Welcome, {user?.NAME}</h2>
-      <p className="text-gray-300 leading-relaxed">
-        Manage policies, track claims, and view reports here.
-      </p>
+    <div className="w-full flex flex-col gap-2 items-center">
+
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl px-8 py-2 shadow-lg">
+          <h2 className="text-lg font-semibold text-cyan-400">Welcome Back, {user?.NAME}</h2>      
+      </div>
+
+      <div className="w-full mt-4">
+          <div className="sm:w-4/12">
+              <Beneficiary/>
+          </div>
+
+      </div>
+
     </div>
   );
 }
