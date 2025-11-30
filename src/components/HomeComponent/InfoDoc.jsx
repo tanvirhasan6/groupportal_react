@@ -41,7 +41,7 @@ export default function InfoDoc() {
 
     return (
         <>
-            <div className="w-full bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg">
+            <div className="w-full bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg text-slate-400">
                 <Toaster />
                 <h3 className='font-bold text-left mb-2 text-teal-400 text-lg'>Info</h3>
                 <div className='flex flex-col gap-2 text-sm'>
@@ -49,7 +49,7 @@ export default function InfoDoc() {
                         docdata && docdata.map(doc => (
                             <p
                                 key={doc.PIC_NAME_ID}
-                                className='flex items-center gap-2'
+                                className='flex items-center gap-2 cursor-pointer'
                                 onClick={() => {
                                     setSelectedDoc(doc)
                                     setOpenModal(true)
