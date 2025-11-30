@@ -19,7 +19,7 @@ export default function BeneficiaryClaimSummary({ percent }) {
             )
 
             const data = await res.json()
-            console.log(res);
+            // console.log(data);
 
             if (data?.status === 200) setClaimUsageData(data?.result)
             else toast.error(data?.message)

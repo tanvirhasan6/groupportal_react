@@ -131,7 +131,8 @@ export default function CircleProgress({
                 >
                     <div className="text-lg font-semibold leading-none">
                         <span className="text-xl sm:text-2xl md:text-3xl">
-                            {Math.round(pct)}
+                            {/* {Math.round(pct)} */}
+                            {pct === 100 ? "100" : pct.toFixed(1)}
                             <span className="text-sm align-super ml-0.5">%</span>
                         </span>
                     </div>
