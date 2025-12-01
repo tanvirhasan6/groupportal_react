@@ -23,8 +23,7 @@ export default function InfoDoc() {
             )
 
             const data = await res.json()
-            console.log(res);
-
+            
             if (data?.status === 200) setDocData(data?.result)
             else toast.error(data?.message)
 

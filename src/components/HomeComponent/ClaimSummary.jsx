@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useUser } from "../../context/UserContext"
 import toast, { Toaster } from "react-hot-toast";
 import { FcDecision } from 'react-icons/fc';
+import Pagination from "../../components/Pagination"
 
 function AnimatedProgress({ value }) {
     const [displayValue, setDisplayValue] = useState(0);
@@ -59,7 +60,12 @@ function AnimatedProgress({ value }) {
 export default function ClaimSummary() {
 
     const user = useUser()
-    const [claimSummaryData, setClaimSummaryData] = useState([])
+
+    const [allClaimSummaryData, setAllClaimSummaryData] = useState([]);
+    const [claimSummaryData, setClaimSummaryData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
+    const [totalPages, setTotalPages] = useState(0);
 
     const usagelist = async () => {
 
@@ -73,10 +79,19 @@ export default function ClaimSummary() {
             )
 
             const data = await res.json()
-            console.log(data);
 
-            if (data?.status === 200) setClaimSummaryData(data?.result)
-            else toast.error(data?.message)
+            if (data?.status === 200) {
+                const finalData = data.result;
+
+                setAllClaimSummaryData(finalData); // store all data
+                setTotalPages(Math.ceil(finalData.length / itemsPerPage));
+
+                // Set first page initially
+                setClaimSummaryData(finalData.slice(0, itemsPerPage));
+            }
+            else {
+                toast.error(data?.message)
+            }
 
         } catch (error) {
             toast.error(error)
@@ -87,7 +102,13 @@ export default function ClaimSummary() {
 
         if (user.POLICY_NO) usagelist()
 
-    }, [user?.POLICY_NO])
+    }, [user?.POLICY_NO], currentPage)
+
+    useEffect(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = currentPage * itemsPerPage;
+        setClaimSummaryData(allClaimSummaryData.slice(start, end));
+    }, [currentPage, allClaimSummaryData])
 
     return (
         <div className='w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-6 shadow-lg mt-6'>
@@ -96,7 +117,7 @@ export default function ClaimSummary() {
             <div className='w-full flex flex-col items-center gap-3 md:hidden'>
                 {
                     claimSummaryData && claimSummaryData.map((summary, idx) => (
-                        <>
+                        <React.Fragment key={summary.INTNO}>
                             <div key={summary.INTNO} className='w-full flex flex-col items-start gap-2 text-xs sm:text-sm border border-slate-600 rounded-sm px-2 py-6 text-slate-300'>
 
                                 <h2>Type: {summary.SHORT_BENEFIT_HEAD}</h2>
@@ -114,10 +135,16 @@ export default function ClaimSummary() {
                                 <p className='w-full text-teal-400 hover:underline cursor-pointer text-center mt-3'>View Details {`->`}</p>
 
                             </div>
-                        </>
+                        </React.Fragment>
                     ))
 
                 }
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+
             </div>
 
             <div className='hidden w-full md:block'>
@@ -142,7 +169,7 @@ export default function ClaimSummary() {
                                 key={summary.INTNO}
                                 className="text-slate-300 text-sm border-b border-slate-700/50 hover:bg-slate-800/40 hover:shadow-[0_0_25px_rgba(0,255,255,0.25)] transition cursor-pointer text-center"
                             >
-                                <td className="py-3 px-4">{idx + 1}</td>
+                                <td className="py-3 px-4">{summary.SL}</td>
                                 <td className="py-3 px-4">{summary.SHORT_BENEFIT_HEAD}</td>
                                 <td className="py-3 px-4">{summary.INTNO_DATE}</td>
                                 <td className="py-3 px-4 text-emerald-400">{summary.LAST_UPLOADED}</td>
@@ -168,6 +195,13 @@ export default function ClaimSummary() {
                         ))}
                     </tbody>
                 </table>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+
             </div>
 
 
