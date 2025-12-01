@@ -3,6 +3,59 @@ import { useUser } from "../../context/UserContext"
 import toast, { Toaster } from "react-hot-toast";
 import { FcDecision } from 'react-icons/fc';
 
+function AnimatedProgress({ value }) {
+    const [displayValue, setDisplayValue] = useState(0);
+
+    useEffect(() => {
+        let start = 0;
+        let end = value;
+        let duration = 1200;
+        let startTime = null;
+
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = timestamp - startTime;
+            const val = Math.min(Math.round((progress / duration) * end), end);
+            setDisplayValue(val);
+
+            if (progress < duration) requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
+    }, [value]);
+
+    return (
+        <div className="w-full mt-2">
+            <div className="w-full h-2 bg-slate-700/50 rounded-full overflow-hidden relative">
+                <div
+                    className="
+                        h-full 
+                        bg-linear-to-r from-cyan-400 to-emerald-400 
+                        shadow-[0_0_12px_rgba(0,255,255,0.9)]
+                        relative overflow-hidden
+                        transition-all duration-700 ease-out
+                    "
+                    style={{ width: `${displayValue}%` }}
+                >
+                    <div
+                        className="
+                            absolute inset-0 
+                            bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.25)_50%,rgba(255,255,255,0.25)_75%,transparent_75%,transparent)]
+                            bg-size-[20px_20px]
+                            animate-[moveStripes_1.2s_linear_infinite]
+                            opacity-60
+                        "
+                    ></div>
+                </div>
+            </div>
+
+            <div className="text-xs text-cyan-300 mt-1 font-semibold tracking-wider">
+                {displayValue}%
+            </div>
+        </div>
+    );
+}
+
 export default function ClaimSummary() {
 
     const user = useUser()
@@ -42,7 +95,7 @@ export default function ClaimSummary() {
 
             <div className='w-full flex flex-col items-center gap-3 md:hidden'>
                 {
-                    claimSummaryData && claimSummaryData.map( (summary,idx) => (
+                    claimSummaryData && claimSummaryData.map((summary, idx) => (
                         <>
                             <div key={summary.INTNO} className='w-full flex flex-col items-start gap-2 text-xs sm:text-sm border border-slate-600 rounded-sm px-2 py-6 text-slate-300'>
 
@@ -89,13 +142,25 @@ export default function ClaimSummary() {
                                 key={summary.INTNO}
                                 className="text-slate-300 text-sm border-b border-slate-700/50 hover:bg-slate-800/40 hover:shadow-[0_0_25px_rgba(0,255,255,0.25)] transition cursor-pointer text-center"
                             >
-                                <td className="py-3 px-4">{idx+1}</td>
+                                <td className="py-3 px-4">{idx + 1}</td>
                                 <td className="py-3 px-4">{summary.SHORT_BENEFIT_HEAD}</td>
                                 <td className="py-3 px-4">{summary.INTNO_DATE}</td>
                                 <td className="py-3 px-4 text-emerald-400">{summary.LAST_UPLOADED}</td>
                                 <td className="py-3 px-4">{summary.CLAIM_AMOUNT}</td>
                                 <td className="py-3 px-4 text-cyan-300">{summary.APPROVEABLE_AMOUNT}</td>
-                                <td className="py-3 px-4 text-pink-300 text-left">{summary.STATUS_NAME}</td>
+                                <td className="py-3 px-4 text-pink-300 text-left">
+
+                                    <p className="text-pink-300 font-medium">{summary.STATUS_NAME}</p>
+                                    {summary.STATUS === 8 && (
+                                        <p className="text-red-400 text-xs mt-1">
+                                            {summary.ADDITIONAL_DOCUMENT_LIST}
+                                        </p>
+                                    )}
+
+                                    {(summary.STATUS === 2 || summary.STATUS === 8) && (
+                                        <AnimatedProgress value={summary.PERCANTAGE} />
+                                    )}
+                                </td>
                                 <td className="py-3 px-4 text-teal-300 hover:underline">
                                     View →
                                 </td>

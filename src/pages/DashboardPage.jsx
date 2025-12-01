@@ -29,6 +29,8 @@ export default function DashboardPage() {
         <ClaimSummary/>
       </div>
 
+      <div className="hidden animate-[moveStripes_1.2s_linear_infinite]"></div>
+
     </div>
   );
 }
