@@ -3,6 +3,7 @@ import { useUser } from "../../context/UserContext"
 import toast, { Toaster } from "react-hot-toast";
 import { FcDecision } from 'react-icons/fc';
 import Pagination from "../../components/Pagination"
+import { useNavigate } from 'react-router-dom';
 
 function AnimatedProgress({ value }) {
     const [displayValue, setDisplayValue] = useState(0);
@@ -60,6 +61,7 @@ function AnimatedProgress({ value }) {
 export default function ClaimSummary() {
 
     const user = useUser()
+    const navigate = useNavigate()
 
     const [allClaimSummaryData, setAllClaimSummaryData] = useState([]);
     const [claimSummaryData, setClaimSummaryData] = useState([]);
@@ -109,6 +111,11 @@ export default function ClaimSummary() {
         const end = currentPage * itemsPerPage;
         setClaimSummaryData(allClaimSummaryData.slice(start, end));
     }, [currentPage, allClaimSummaryData])
+
+    const handleClaimView = (intno) => {
+        sessionStorage.setItem("intno", intno)
+        if(intno) navigate(`/dashboard/claimDetails`)        
+    }
 
     return (
         <div className='w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-6 shadow-lg mt-6'>
@@ -188,7 +195,7 @@ export default function ClaimSummary() {
                                         <AnimatedProgress value={summary.PERCANTAGE} />
                                     )}
                                 </td>
-                                <td className="py-3 px-4 text-teal-300 hover:underline">
+                                <td className="py-3 px-4 text-teal-300 hover:underline" onClick={(e)=>handleClaimView(summary.INTNO)}>
                                     View →
                                 </td>
                             </tr>

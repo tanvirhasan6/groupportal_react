@@ -379,7 +379,7 @@ const ClaimForm = () => {
 
                         data = JSON.parse(text)
                         console.log(data);
-                        toast.success('Calim Successfull')
+                        toast.success('Claim Successfull')
 
                         setTimeout(() => {
                             navigate("/dashboard", { replace: true });
