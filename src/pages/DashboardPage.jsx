@@ -23,14 +23,19 @@ export default function DashboardPage() {
         <Beneficiary />
         <InfoDoc />
       </div>
+      {
+        user.GROUP_CODE === 0 &&
+        <>
+          <div className="w-full">
+            <BeneficiaryClaimSummary percent={100} />
+          </div>
 
-      <div className="w-full">
-        <BeneficiaryClaimSummary percent={100} />
-      </div>
 
-      <div className="w-full">
-        <ClaimSummary />
-      </div>
+          <div className="w-full">
+            <ClaimSummary />
+          </div>
+        </>
+      }
 
       <div className="hidden animate-[moveStripes_1.2s_linear_infinite]"></div>
 
