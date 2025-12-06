@@ -12,4 +12,9 @@ export default defineConfig({
       },
     }),
   ],
+  // server: {
+  //   host: 'localhost',   // ← Force IPv4
+  //   port: 5173,          // ← Ensure same port
+  //   strictPort: true,    // ← Prevent random port changes
+  // },
 })

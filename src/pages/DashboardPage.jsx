@@ -7,6 +7,7 @@ import BeneficiaryClaimSummary from "../components/HomeComponent/BeneficiaryClai
 import ClaimSummary from "../components/HomeComponent/ClaimSummary";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import AdminClaimSummary from "../components/HomeComponent/AdminClaimSummary";
 
 export default function DashboardPage() {
   const user = useUser();
@@ -36,6 +37,14 @@ export default function DashboardPage() {
           </div>
         </>
       }
+
+      {
+        user.GROUP_CODE !== 0 &&
+        <div className="w-full">
+          <AdminClaimSummary />
+        </div>
+      }
+
 
       <div className="hidden animate-[moveStripes_1.2s_linear_infinite]"></div>
 

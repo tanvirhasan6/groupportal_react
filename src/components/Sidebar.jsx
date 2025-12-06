@@ -21,12 +21,16 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     let menus;
 
     if (groupCode === "100") {
-        menus = ["Death Claim", "FAQ", "Hospitals", "Manage", "Missing Info"];
+        menus = [ "Manage", "Missing Info" ];
     } else if (groupCode === "0") {
-        menus = ["Profile", "New Claim", "FAQ", "Health Card", "Hospitals"];
+        menus = [ "Profile", "Health Card" ];
     } else {
-        menus = ["Profile", "Death Claim", "Hospitals"];
+        menus = [ "Profile" ];
     }
+
+    menus.push( "FAQ", "Hospitals", "New Claim" )
+
+    menus.sort()
 
     const iconMap = {
         "Profile": <FaUser />,
