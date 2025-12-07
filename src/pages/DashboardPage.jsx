@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import Beneficiary from "../components/HomeComponent/Beneficiary";
 import InfoDoc from "../components/HomeComponent/InfoDoc";
@@ -8,10 +8,12 @@ import ClaimSummary from "../components/HomeComponent/ClaimSummary";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import AdminClaimSummary from "../components/HomeComponent/AdminClaimSummary";
+import AdminReporting from "../components/HomeComponent/AdminReporting";
 
 export default function DashboardPage() {
   const user = useUser();
   const navigate = useNavigate()
+  
 
   return (
     <div className="w-full flex flex-col gap-2 items-center">
@@ -25,7 +27,7 @@ export default function DashboardPage() {
         <InfoDoc />
       </div>
       {
-        user.GROUP_CODE === 0 &&
+        user.GROUP_CODE === '0' &&
         <>
           <div className="w-full">
             <BeneficiaryClaimSummary percent={100} />
@@ -39,10 +41,15 @@ export default function DashboardPage() {
       }
 
       {
-        user.GROUP_CODE !== 0 &&
+        user.GROUP_CODE !== '0' &&
         <div className="w-full">
           <AdminClaimSummary />
         </div>
+      }
+
+      {
+        user.GROUP_CODE === '100' &&
+        <AdminReporting/>
       }
 
 
