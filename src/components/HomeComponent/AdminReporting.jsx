@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useUser } from "../../context/UserContext"
 import DatePickerInput from "../MyDatePicker/DatePickerInput"
 import toast from "react-hot-toast"
 
-import * as XLSX from "xlsx";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-pdfMake.vfs = pdfFonts?.pdfMake?.vfs || pdfFonts.vfs
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 export default function AdminReporting() {
 
@@ -19,7 +18,9 @@ export default function AdminReporting() {
     const [minEndDate, setMinEndDate] = useState(null)
 
     const [reportData, setReportData] = useState([])
+    const [totalData, setTotalData] = useState({})
     const [format, setFormat] = useState("")
+    const tableRef = useRef(null)
 
     useEffect(() => {
         if (stDate) {
@@ -46,7 +47,10 @@ export default function AdminReporting() {
 
                 const data = await res.json()
 
-                if (data?.status === 200) setReportData(data?.result)
+                if (data?.status === 200) {
+                    setReportData(data?.result?.benefitSummary)
+                    setTotalData(data?.result?.totalClaims)
+                }
                 else toast.error(data?.message)
 
                 setLoading(false)
@@ -62,46 +66,270 @@ export default function AdminReporting() {
 
     }
 
-    const downloadExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(reportData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Summary");
-        XLSX.writeFile(wb, "summary.xlsx");
-    }
-
-    const downloadPDF = () => {
-        if (reportData.length === 0) return;
-
-        const headers = Object.keys(reportData[0]);
-
-        const body = [
-            headers,
-            ...reportData.map(row => headers.map(h => row[h] ?? ""))
-        ];
-
-        const doc = {
-            pageOrientation: "landscape",
-            content: [
-                { text: "Summary Report", style: "header" },
-                {
-                    table: {
-                        headerRows: 1,
-                        body: body
-                    }
-                }
-            ],
-            styles: {
-                header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] }
-            }
-        };
-
-        pdfMake.createPdf(doc).download("summary.pdf");
-    }
-
     const handleDownload = (value) => {
         setFormat(value);
-        if (value === "pdf") downloadPDF();
-        if (value === "excel") downloadExcel();
+        if (value === "pdf") generatePDF();
+        if (value === "excel") generateExcel();
+    }
+
+    const generateExcel = () => {
+        const wb = XLSX.utils.book_new();
+        const sheetData = [];
+
+        // =============================
+        // ADD TOP HEADER LINES
+        // =============================
+        sheetData.push([`Zenith Islami Life Insurance Ltd`]);
+        sheetData.push([`Summary Report From ${stDate} To ${endDate}`]);
+        sheetData.push([`Policy Holder: ${user?.ORGANIZATION} (${user?.POLICY_NO})`]);
+
+        // Empty row for spacing
+        sheetData.push([]);
+
+        // =============================
+        // TABLE HEADER ROW
+        // =============================
+        sheetData.push([
+            "Claim Type",
+
+            // Administration
+            "Admin Pending Count", "Admin Pending Amount",
+            "Admin Approved Count", "Admin Approved Amount",
+            "Admin Declined Count", "Admin Declined Amount",
+            "Admin Requirement Count", "Admin Requirement Amount",
+
+            // Zenith
+            "Zenith Assess Count", "Zenith Assess Amount",
+            "Zenith Requirement Count", "Zenith Requirement Amount",
+            "Zenith Declined Count", "Zenith Declined Amount",
+
+            // Payment
+            "Processing Count", "Processing Amount",
+            "Completed Count", "Completed Amount",
+
+            // Non-payable
+            "Non Payable",
+        ]);
+
+        // =============================
+        // DATA ROWS
+        // =============================
+        reportData.forEach((row) => {
+            const adminReqCnt = row.ADMIN_REQUIRED + row.ADMIN_ADDITIONAL;
+            const adminReqAmt = row.ADMIN_REQUIRED_AMT + row.ADMIN_ADDITIONAL_AMT;
+            const zenithReqCnt = row.ZENITH_REQUIRED + row.ZENITH_ADDITIONAL;
+            const zenithReqAmt = row.ZENITH_REQUIRED_AMT + row.ZENITH_ADDITIONAL_AMT;
+
+            sheetData.push([
+                row.BENEFIT_HEAD,
+
+                row.ADMIN_PENDING, row.ADMIN_PENDING_AMT,
+                row.ADMIN_APPROVED, row.ADMIN_APPROVED_AMT,
+                row.ADMIN_DECLINED, row.ADMIN_DECLINED_AMT,
+                adminReqCnt, adminReqAmt,
+
+                row.ADMIN_APPROVED, row.ADMIN_APPROVED_AMT,
+                zenithReqCnt, zenithReqAmt,
+                row.ZENITH_DECLINED, row.ZENITH_DECLINED_AMT,
+
+                row.PAYMENT_PROCESSING, row.PAYMENT_PROCESSING_AMT,
+                row.PAYMENT_COMPLETED, row.PAYMENT_COMPLETED_AMT,
+
+                row.NON_PAYABLE_AMT,
+            ]);
+        });
+
+        // =============================
+        // TOTAL CALCULATION
+        // =============================
+        const total = reportData.reduce(
+            (a, r) => {
+                a.adminPendingCnt += r.ADMIN_PENDING;
+                a.adminPendingAmt += r.ADMIN_PENDING_AMT;
+                a.adminApprovedCnt += r.ADMIN_APPROVED;
+                a.adminApprovedAmt += r.ADMIN_APPROVED_AMT;
+                a.adminDeclinedCnt += r.ADMIN_DECLINED;
+                a.adminDeclinedAmt += r.ADMIN_DECLINED_AMT;
+
+                a.adminReqCnt += r.ADMIN_REQUIRED + r.ADMIN_ADDITIONAL;
+                a.adminReqAmt += r.ADMIN_REQUIRED_AMT + r.ADMIN_ADDITIONAL_AMT;
+
+                a.zenithAssessCnt += r.ADMIN_APPROVED;
+                a.zenithAssessAmt += r.ADMIN_APPROVED_AMT;
+                a.zenithReqCnt += r.ZENITH_REQUIRED + r.ZENITH_ADDITIONAL;
+                a.zenithReqAmt += r.ZENITH_REQUIRED_AMT + r.ZENITH_ADDITIONAL_AMT;
+                a.zenithDeclCnt += r.ZENITH_DECLINED;
+                a.zenithDeclAmt += r.ZENITH_DECLINED_AMT;
+
+                a.procCnt += r.PAYMENT_PROCESSING;
+                a.procAmt += r.PAYMENT_PROCESSING_AMT;
+                a.compCnt += r.PAYMENT_COMPLETED;
+                a.compAmt += r.PAYMENT_COMPLETED_AMT;
+
+                a.nonPayableAmt += r.NON_PAYABLE_AMT;
+
+                return a;
+            },
+            {
+                adminPendingCnt: 0, adminPendingAmt: 0,
+                adminApprovedCnt: 0, adminApprovedAmt: 0,
+                adminDeclinedCnt: 0, adminDeclinedAmt: 0,
+                adminReqCnt: 0, adminReqAmt: 0,
+                zenithAssessCnt: 0, zenithAssessAmt: 0,
+                zenithReqCnt: 0, zenithReqAmt: 0,
+                zenithDeclCnt: 0, zenithDeclAmt: 0,
+                procCnt: 0, procAmt: 0,
+                compCnt: 0, compAmt: 0,
+                nonPayableAmt: 0,
+            }
+        );
+
+        // Spacing before total
+        sheetData.push([]);
+
+        // =============================
+        // TOTAL ROW
+        // =============================
+        sheetData.push([
+            "TOTAL",
+
+            total.adminPendingCnt, total.adminPendingAmt,
+            total.adminApprovedCnt, total.adminApprovedAmt,
+            total.adminDeclinedCnt, total.adminDeclinedAmt,
+            total.adminReqCnt, total.adminReqAmt,
+
+            total.zenithAssessCnt, total.zenithAssessAmt,
+            total.zenithReqCnt, total.zenithReqAmt,
+            total.zenithDeclCnt, total.zenithDeclAmt,
+
+            total.procCnt, total.procAmt,
+            total.compCnt, total.compAmt,
+
+            total.nonPayableAmt,
+        ]);
+
+        // Spacing before total
+        sheetData.push([]);
+
+        sheetData.push(["Total Claim-", `Count: ${totalData.CNTCLAIM}`, `Amount: ${totalData.CLAIMED.toLocaleString()}`])
+
+        // =============================
+        // WRITE SHEET
+        // =============================
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+        // OPTIONAL: SET WIDE COLUMNS FOR LANDSCAPE FEEL
+        const colWidths = new Array(20).fill({ wch: 20 });
+        ws['!cols'] = colWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Summary Report");
+
+        XLSX.writeFile(wb, "claim-summary.xlsx");
+    }
+
+    const generatePDF = async () => {
+        if (!tableRef.current) {
+            console.error("Table not found!");
+            return;
+        }
+
+        // LEGAL page, landscape
+        const pdf = new jsPDF("landscape", "pt", "legal");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+
+        // -------------------
+        //     HEADER
+        // -------------------
+        pdf.setFontSize(18);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(
+            "Zenith Islami Life Insurance Ltd",
+            pageWidth / 2,
+            50,
+            { align: "center" }
+        );
+
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(
+            `Summary Report From ${stDate} To ${endDate}`,
+            pageWidth / 2,
+            70,
+            { align: "center" }
+        );
+
+        pdf.text(
+            `Policy Holder: ${user?.ORGANIZATION} (${user?.POLICY_NO})`,
+            pageWidth / 2,
+            90,
+            { align: "center" }
+        );
+
+        pdf.text(
+            `Total Claim - Count: ${totalData.CNTCLAIM}, Amount: ${totalData.CLAIMED.toLocaleString()}`,
+            40,
+            120,
+            { align: "left" }
+        );
+
+        // -------------------
+        //     TABLE
+        // -------------------
+
+        let tableFinalY = 0;
+
+        autoTable(pdf, {
+            html: tableRef.current,
+            startY: 130,
+            didDrawPage: function (data) {
+                tableFinalY = data.cursor.y;  // This always gives the last Y of the table
+            },
+            theme: "grid",
+            styles: {
+                fontSize: 10,
+                halign: "center",     // center all text
+                textColor: "black",
+                lineColor: "black",
+                lineWidth: 0.3,
+                fillColor: false,
+            },
+            headStyles: {
+                halign: "center",
+                fillColor: false,
+                textColor: "black",
+                lineColor: "black",
+            },
+            bodyStyles: {
+                halign: "center",
+                fillColor: false,
+                textColor: "black",
+            },
+            tableWidth: "auto",
+            margin: { left: 40, right: 40, bottom: 20, },
+        });
+
+        // const marginTop = 10; // desired space between table and total line
+        // const textY = tableFinalY + marginTop;
+
+        // pdf.setFontSize(12);
+        // pdf.setFont("helvetica", "normal");
+
+        // pdf.text(
+        //     " ",
+        //     pageWidth / 2,
+        //     50,
+        //     { align: "center" }
+        // )
+        
+        // pdf.text(
+        //     `Total Claim - Count: ${totalData.CNTCLAIM}, Amount: ${totalData.CLAIMED}`,
+        //     pdf.internal.pageSize.getWidth() / 2,
+        //     textY,
+        //     { align: "center" }
+        // );
+
+        pdf.save("claim-report-summary.pdf");
     }
 
     return (
@@ -212,76 +440,89 @@ export default function AdminReporting() {
 
                             {/* Scrollable table */}
                             {reportData.length > 0 && (
-                                <div className="my-4 overflow-auto border border-gray-700 rounded-lg">
+                                <div className="my-6 overflow-auto rounded-xl bg-black/60 backdrop-blur-xl border-0">
 
-                                    <table className="w-full text-sm text-gray-300">
-                                        <thead>
-                                            <tr>
-                                                <th rowSpan="3">Claim Type</th>
+                                    <table ref={tableRef} className="w-full text-sm text-gray-300">
 
-                                                <th colSpan="8" style={{ background: "#0c0e5714" }}>Administration</th>
-                                                <th colSpan="6" style={{ background: "#1c543a14" }}>Zenith Life</th>
-                                                <th colSpan="4" style={{ background: "#ffe6f8ba" }}>Approved Payment Info</th>
+                                        {/* HEADER */}
+                                        <thead className="uppercase text-xs tracking-wider">
 
-                                                <th rowSpan="4">Non Payable</th>
+                                            {/* TOP HEADER */}
+                                            <tr className="text-center bg-slate-800">
+                                                <th
+                                                    rowSpan="3"
+                                                    className="px-4 py-3 border border-white/10"
+                                                >
+                                                    Claim Type
+                                                </th>
+
+                                                <th colSpan="8" className="px-4 py-3 border border-white/10">
+                                                    Administration
+                                                </th>
+
+                                                <th colSpan="6" className="px-4 py-3 border border-white/10">
+                                                    Zenith Life
+                                                </th>
+
+                                                <th colSpan="4" className="px-4 py-3 border border-white/10">
+                                                    Approved Payment Info
+                                                </th>
+
+                                                <th
+                                                    rowSpan="3"
+                                                    className="px-4 py-3 border border-white/10"
+                                                >
+                                                    Non-Payable
+                                                </th>
                                             </tr>
 
-                                            <tr>
-                                                {/* ADMIN */}
-                                                <th colSpan="2" style={{ background: "#0c0e5714" }}>Pending</th>
-                                                <th colSpan="2" style={{ background: "#0c0e5714" }}>Forwarded</th>
-                                                <th colSpan="2" style={{ background: "#0c0e5714" }}>Declined</th>
-                                                <th colSpan="2" style={{ background: "#0c0e5714" }}>Requirement</th>
-
-                                                {/* ZENITH */}
-                                                <th colSpan="2" style={{ background: "#1c543a14" }}>Assessing</th>
-                                                <th colSpan="2" style={{ background: "#1c543a14" }}>Requirement</th>
-                                                <th colSpan="2" style={{ background: "#1c543a14" }}>Declined</th>
-
-                                                {/* PAYMENT */}
-                                                <th colSpan="2" style={{ background: "#ffe6f8ba" }}>Processing</th>
-                                                <th colSpan="2" style={{ background: "#ffe6f8ba" }}>Completed</th>
+                                            {/* SUBGROUP TITLES */}
+                                            <tr className="text-center bg-slate-800">
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Pending</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Forwarded</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Declined</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Requirement</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Assessing</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Requirement</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Declined</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Processing</th>
+                                                <th colSpan="2" className="py-3 border border-white/10 ">Completed</th>
                                             </tr>
 
-                                            <tr>
-                                                {/* ADMIN columns */}
-                                                <th style={{ background: "#0c0e5714" }}>Count</th>
-                                                <th style={{ background: "#0c0e5714" }}>Amount</th>
-                                                <th style={{ background: "#0c0e5714" }}>Count</th>
-                                                <th style={{ background: "#0c0e5714" }}>Amount</th>
-                                                <th style={{ background: "#0c0e5714" }}>Count</th>
-                                                <th style={{ background: "#0c0e5714" }}>Amount</th>
-                                                <th style={{ background: "#0c0e5714" }}>Count</th>
-                                                <th style={{ background: "#0c0e5714" }}>Amount</th>
-
-                                                {/* ZENITH columns */}
-                                                <th style={{ background: "#1c543a14" }}>Count</th>
-                                                <th style={{ background: "#1c543a14" }}>Amount</th>
-                                                <th style={{ background: "#1c543a14" }}>Count</th>
-                                                <th style={{ background: "#1c543a14" }}>Amount</th>
-                                                <th style={{ background: "#1c543a14" }}>Count</th>
-                                                <th style={{ background: "#1c543a14" }}>Amount</th>
-
-                                                {/* PAYMENT columns */}
-                                                <th style={{ background: "#ffe6f8ba" }}>Count</th>
-                                                <th style={{ background: "#ffe6f8ba" }}>Amount</th>
-                                                <th style={{ background: "#ffe6f8ba" }}>Count</th>
-                                                <th style={{ background: "#ffe6f8ba" }}>Amount</th>
-
+                                            {/* FINAL HEADER ROW */}
+                                            <tr className="text-center bg-slate-800">
+                                                {[
+                                                    // Administration
+                                                    "Count", "Amount", "Count", "Amount", "Count", "Amount", "Count", "Amount",
+                                                    // Zenith
+                                                    "Count", "Amount", "Count", "Amount", "Count", "Amount",
+                                                    // Payment
+                                                    "Count", "Amount", "Count", "Amount"
+                                                ].map((h, i) => (
+                                                    <th
+                                                        key={i}
+                                                        className="px-2 py-2 border border-white/10"
+                                                    >
+                                                        {h}
+                                                    </th>
+                                                ))}
                                             </tr>
                                         </thead>
 
+                                        {/* BODY */}
                                         <tbody>
                                             {reportData.map((row, i) => {
-
                                                 const adminReqCnt = row.ADMIN_REQUIRED + row.ADMIN_ADDITIONAL;
                                                 const adminReqAmt = row.ADMIN_REQUIRED_AMT + row.ADMIN_ADDITIONAL_AMT;
                                                 const zenithReqCnt = row.ZENITH_REQUIRED + row.ZENITH_ADDITIONAL;
                                                 const zenithReqAmt = row.ZENITH_REQUIRED_AMT + row.ZENITH_ADDITIONAL_AMT;
 
                                                 return (
-                                                    <tr key={i}>
-                                                        <td>{row.BENEFIT_HEAD}</td>
+                                                    <tr
+                                                        key={i}
+                                                        className="text-center border-b bg-slate-900 border-white/5 hover:bg-white/5 transition"
+                                                    >
+                                                        <td className="px-4 py-3 text-left">{row.BENEFIT_HEAD}</td>
 
                                                         {/* ADMIN */}
                                                         <td>{row.ADMIN_PENDING}</td>
@@ -307,39 +548,43 @@ export default function AdminReporting() {
                                                         <td>{row.PAYMENT_COMPLETED}</td>
                                                         <td>{row.PAYMENT_COMPLETED_AMT.toLocaleString()}</td>
 
+                                                        {/* NON-PAYABLE */}
                                                         <td>{row.NON_PAYABLE_AMT.toLocaleString()}</td>
                                                     </tr>
                                                 );
                                             })}
 
-                                            <tr className="font-bold bg-gray-100">
+                                            {/* TOTAL ROW */}
+                                            <tr className="font-semibold bg-neutral-900/80 text-white border-t border-white/20 text-center">
+                                                <td className="px-4 py-3 text-left">Total =</td>
+
                                                 {(() => {
-                                                    const totals = reportData.reduce(
-                                                        (acc, row) => {
-                                                            acc.adminPendingCnt += row.ADMIN_PENDING;
-                                                            acc.adminPendingAmt += row.ADMIN_PENDING_AMT;
-                                                            acc.adminApprovedCnt += row.ADMIN_APPROVED;
-                                                            acc.adminApprovedAmt += row.ADMIN_APPROVED_AMT;
-                                                            acc.adminDeclinedCnt += row.ADMIN_DECLINED;
-                                                            acc.adminDeclinedAmt += row.ADMIN_DECLINED_AMT;
-                                                            acc.adminReqCnt += row.ADMIN_REQUIRED + row.ADMIN_ADDITIONAL;
-                                                            acc.adminReqAmt += row.ADMIN_REQUIRED_AMT + row.ADMIN_ADDITIONAL_AMT;
+                                                    const t = reportData.reduce(
+                                                        (a, r) => {
+                                                            a.adminPendingCnt += r.ADMIN_PENDING;
+                                                            a.adminPendingAmt += r.ADMIN_PENDING_AMT;
+                                                            a.adminApprovedCnt += r.ADMIN_APPROVED;
+                                                            a.adminApprovedAmt += r.ADMIN_APPROVED_AMT;
+                                                            a.adminDeclinedCnt += r.ADMIN_DECLINED;
+                                                            a.adminDeclinedAmt += r.ADMIN_DECLINED_AMT;
+                                                            a.adminReqCnt += r.ADMIN_REQUIRED + r.ADMIN_ADDITIONAL;
+                                                            a.adminReqAmt += r.ADMIN_REQUIRED_AMT + r.ADMIN_ADDITIONAL_AMT;
 
-                                                            acc.zenithAssessCnt += row.ADMIN_APPROVED;
-                                                            acc.zenithAssessAmt += row.ADMIN_APPROVED_AMT;
-                                                            acc.zenithReqCnt += row.ZENITH_REQUIRED + row.ZENITH_ADDITIONAL;
-                                                            acc.zenithReqAmt += row.ZENITH_REQUIRED_AMT + row.ZENITH_ADDITIONAL_AMT;
-                                                            acc.zenithDeclCnt += row.ZENITH_DECLINED;
-                                                            acc.zenithDeclAmt += row.ZENITH_DECLINED_AMT;
+                                                            a.zenithAssessCnt += r.ADMIN_APPROVED;
+                                                            a.zenithAssessAmt += r.ADMIN_APPROVED_AMT;
+                                                            a.zenithReqCnt += r.ZENITH_REQUIRED + r.ZENITH_ADDITIONAL;
+                                                            a.zenithReqAmt += r.ZENITH_REQUIRED_AMT + r.ZENITH_ADDITIONAL_AMT;
+                                                            a.zenithDeclCnt += r.ZENITH_DECLINED;
+                                                            a.zenithDeclAmt += r.ZENITH_DECLINED_AMT;
 
-                                                            acc.procCnt += row.PAYMENT_PROCESSING;
-                                                            acc.procAmt += row.PAYMENT_PROCESSING_AMT;
-                                                            acc.compCnt += row.PAYMENT_COMPLETED;
-                                                            acc.compAmt += row.PAYMENT_COMPLETED_AMT;
+                                                            a.procCnt += r.PAYMENT_PROCESSING;
+                                                            a.procAmt += r.PAYMENT_PROCESSING_AMT;
+                                                            a.compCnt += r.PAYMENT_COMPLETED;
+                                                            a.compAmt += r.PAYMENT_COMPLETED_AMT;
 
-                                                            acc.nonPayableAmt += row.NON_PAYABLE_AMT;
+                                                            a.nonPayableAmt += r.NON_PAYABLE_AMT;
 
-                                                            return acc;
+                                                            return a;
                                                         },
                                                         {
                                                             adminPendingCnt: 0,
@@ -366,37 +611,36 @@ export default function AdminReporting() {
 
                                                     return (
                                                         <>
-                                                            <td>Total =</td>
-                                                            <td>{totals.adminPendingCnt}</td>
-                                                            <td>{totals.adminPendingAmt.toLocaleString()}</td>
-                                                            <td>{totals.adminApprovedCnt}</td>
-                                                            <td>{totals.adminApprovedAmt.toLocaleString()}</td>
-                                                            <td>{totals.adminDeclinedCnt}</td>
-                                                            <td>{totals.adminDeclinedAmt.toLocaleString()}</td>
-                                                            <td>{totals.adminReqCnt}</td>
-                                                            <td>{totals.adminReqAmt.toLocaleString()}</td>
+                                                            <td>{t.adminPendingCnt}</td>
+                                                            <td>{t.adminPendingAmt.toLocaleString()}</td>
+                                                            <td>{t.adminApprovedCnt}</td>
+                                                            <td>{t.adminApprovedAmt.toLocaleString()}</td>
+                                                            <td>{t.adminDeclinedCnt}</td>
+                                                            <td>{t.adminDeclinedAmt.toLocaleString()}</td>
+                                                            <td>{t.adminReqCnt}</td>
+                                                            <td>{t.adminReqAmt.toLocaleString()}</td>
 
-                                                            <td>{totals.zenithAssessCnt}</td>
-                                                            <td>{totals.zenithAssessAmt.toLocaleString()}</td>
-                                                            <td>{totals.zenithReqCnt}</td>
-                                                            <td>{totals.zenithReqAmt.toLocaleString()}</td>
-                                                            <td>{totals.zenithDeclCnt}</td>
-                                                            <td>{totals.zenithDeclAmt.toLocaleString()}</td>
+                                                            <td>{t.zenithAssessCnt}</td>
+                                                            <td>{t.zenithAssessAmt.toLocaleString()}</td>
+                                                            <td>{t.zenithReqCnt}</td>
+                                                            <td>{t.zenithReqAmt.toLocaleString()}</td>
+                                                            <td>{t.zenithDeclCnt}</td>
+                                                            <td>{t.zenithDeclAmt.toLocaleString()}</td>
 
-                                                            <td>{totals.procCnt}</td>
-                                                            <td>{totals.procAmt.toLocaleString()}</td>
-                                                            <td>{totals.compCnt}</td>
-                                                            <td>{totals.compAmt.toLocaleString()}</td>
+                                                            <td>{t.procCnt}</td>
+                                                            <td>{t.procAmt.toLocaleString()}</td>
+                                                            <td>{t.compCnt}</td>
+                                                            <td>{t.compAmt.toLocaleString()}</td>
 
-                                                            <td>{totals.nonPayableAmt.toLocaleString()}</td>
+                                                            <td>{t.nonPayableAmt.toLocaleString()}</td>
                                                         </>
                                                     );
                                                 })()}
                                             </tr>
                                         </tbody>
                                     </table>
-
                                 </div>
+
                             )}
 
                         </div>
