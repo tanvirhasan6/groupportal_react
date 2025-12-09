@@ -13,8 +13,8 @@ export default function AdminReporting() {
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
 
-    const [stDate, setStDate] = useState(null)
-    const [endDate, setEndDate] = useState(null)
+    const [stDate, setStDate] = useState('')
+    const [endDate, setEndDate] = useState('')
     const [minEndDate, setMinEndDate] = useState(null)
 
     const [reportData, setReportData] = useState([])
