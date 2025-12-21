@@ -35,15 +35,15 @@ export default function Manage() {
     const [filteredAdminGroupData, setFilteredAdminGroupData] = useState([])
 
     const [blankGroupData, setBlankAdminGroupData] = useState([])
-    const [enrollFaculty, setEnrollFaculty] = useState('')
-    const [enrollDepartment, setEnrollDepartment] = useState('')
+    // const [enrollFaculty, setEnrollFaculty] = useState('')
+    // const [enrollDepartment, setEnrollDepartment] = useState('')
 
-    const [deptData, setDeptData] = useState([])
+    // const [deptData, setDeptData] = useState([])
     const [facultyData, setFacultyData] = useState([])
     const [adminData, setAdminData] = useState([])
 
     const [faculty, setFaculty] = useState('')
-    const [dept, setDept] = useState('')
+    // const [dept, setDept] = useState('')
     const [admin, setAdmin] = useState('')
     const [selectedDepartments, setSelectedDepartments] = useState([])
 
@@ -106,14 +106,14 @@ export default function Manage() {
                     ).values()
                 ]
 
-                const deptPairs = data?.result?.deptFacultyData.map(item => ({
-                    value: item.DEPT_CODE,
-                    label: item.DEPARTMENT,
-                    groupCode: item.GROUP_CODE,
-                }))
+                // const deptPairs = data?.result?.deptFacultyData.map(item => ({
+                //     value: item.DEPT_CODE,
+                //     label: item.DEPARTMENT,
+                //     groupCode: item.GROUP_CODE,
+                // }))
 
                 setFacultyData(facultyPairs)
-                setDeptData(deptPairs)
+                // setDeptData(deptPairs)
             }
             else toast.error(data?.message)
 
@@ -309,23 +309,111 @@ export default function Manage() {
 
     }
 
-    const handleAdminAdd = (admin) => {
-        setAdmin(admin)
+    const handleFacultyChange = (value) => {
+        setFaculty(value)
+        console.log(value);
+        
+        if (!value) {
+            setFilteredAdminGroupData(adminGroupData)
+            return
+        }
+
+        const selectedFaculty = String(value)
+
+        const updatedArray = filteredAdminGroupData
+            .filter(item =>
+                item.FACULTY_CODE === null ||
+                String(item.FACULTY_CODE) === selectedFaculty
+            )
+            .sort((a, b) =>
+                String(a.FACULTY ?? '').localeCompare(String(b.FACULTY ?? '')) ||
+                String(a.DEPARTMENT ?? '').localeCompare(String(b.DEPARTMENT ?? ''))
+            )
+
+        setFilteredAdminGroupData(updatedArray)
+
+    }
+
+    const handleAdminAdd = (selected) => {
+        console.log('selected: ', selected)
+        if (!admin) {
+            toast.error('Select an Admin first')
+            return
+        }
+
+        const adminToAssign = adminGroupData
+            .filter((a, index, self) =>
+                a.USERNAME === admin &&
+                index === self.findIndex(item => item.USERNAME === a.USERNAME)
+            ) // remove duplicates by USERNAME
+            .map(a => ({
+                USERNAME: a.USERNAME,
+                GROUP_CODE: a.GROUP_CODE,
+                NAME: a.NAME,
+                EMAIL: a.EMAIL,
+                MOBILE: a.MOBILE
+            }))[0]
+
+        if (!adminToAssign) {
+            toast.error("Selected admin not found")
+            return
+        }
+
+        const blankRow = blankGroupData.find(item => item.DEPT_CODE === selected.DEPT_CODE)
+        if (!blankRow) {
+            toast.error("Blank row not found")
+            return
+        }
+
+        setFilteredAdminGroupData(prev =>
+            prev.map(item =>
+                item.DEPT_CODE === selected.DEPT_CODE
+                    ? {
+                        ...item,
+                        USERNAME: adminToAssign.USERNAME,
+                        GROUP_CODE: adminToAssign.GROUP_CODE,
+                        NAME: adminToAssign.NAME,
+                        EMAIL: adminToAssign.EMAIL,
+                        MOBILE: adminToAssign.MOBILE
+                    }
+                    : item
+            )
+        )
+
+        setFilteredAdminGroupData(prev =>
+            [...prev].sort((a, b) =>
+                (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
+                (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
+                (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
+            )
+        )
+
+        setBlankAdminGroupData(prev =>
+            prev.filter(item => item.DEPT_CODE !== selected.DEPT_CODE)
+        )
+
     }
 
     const handleAdminRemove = (admin) => {
 
-        const updatedArray = filteredAdminGroupData
-            .filter(item =>
-                !(item.GROUP_CODE === admin.GROUP_CODE && item.DEPT_CODE === admin.DEPT_CODE)
-            )
-            .sort((a, b) => (
+        setFilteredAdminGroupData(prev =>
+            prev.map(item =>
+                item.DEPT_CODE === admin.DEPT_CODE
+                    ? {
+                        ...item,
+                        USERNAME: null,
+                        GROUP_CODE: null,
+                        NAME: null,
+                        EMAIL: null,
+                        MOBILE: null
+                    }
+                    : item
+            ).sort((a, b) =>
                 (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
                 (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
                 (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
-            ))
-
-        setFilteredAdminGroupData(updatedArray)
+            )
+        )
 
         const blankItem = {
             ...admin,
@@ -548,17 +636,16 @@ export default function Manage() {
                             />
                         </div>
 
-                        {/* <div className=''>
+                        <div className=''>
                             <SearchableSelect
                                 label="Faculty"
                                 options={facultyData}
                                 value={faculty}
                                 onChange={handleFacultyChange}
                                 placeholder="Select Faculty"
-                                disabled={!admin}
                                 onFocus={(e) => e.target.select()}
                             />
-                        </div> */}
+                        </div>
 
                     </div>
 
