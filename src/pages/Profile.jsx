@@ -97,7 +97,7 @@ const ProfilePage = () => {
 
             console.log("Upload:", data?.message)
         } catch (err) {
-            toast.error("Upload failed")
+            toast.error(`Upload failed: ${err}`)
         }
     }
 
