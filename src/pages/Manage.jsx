@@ -9,27 +9,28 @@ export default function Manage() {
     const user = useUser()
 
     const [loading, setLoading] = useState(false)
+    const [enrollLoading, setEnrollLoading] = useState(false)
 
     const [username, setUsername] = useState('')
     const [name, setName] = useState('')
     const [mobile, setMobile] = useState('')
     const [email, setEmail] = useState('')
 
-    const usernameTimer = useRef(null);
-    const mobileTimer = useRef(null);
-    const emailTimer = useRef(null);
+    const usernameTimer = useRef(null)
+    const mobileTimer = useRef(null)
+    const emailTimer = useRef(null)
 
     const [errors, setErrors] = useState({
         username: "",
         mobile: "",
         email: ""
-    });
+    })
 
     const [valid, setValid] = useState({
         username: null, // true, false, or null
         mobile: null,
         email: null
-    });
+    })
 
     const [adminGroupData, setAdminGroupData] = useState([])
     const [filteredAdminGroupData, setFilteredAdminGroupData] = useState([])
@@ -312,7 +313,7 @@ export default function Manage() {
     const handleFacultyChange = (value) => {
         setFaculty(value)
         console.log(value);
-        
+
         if (!value) {
             setFilteredAdminGroupData(adminGroupData)
             return
@@ -334,12 +335,12 @@ export default function Manage() {
 
     }
 
-    const handleAdminAdd = (selected) => {
-        console.log('selected: ', selected)
+    const handleAdminAdd = async (selected) => {
+
         if (!admin) {
             toast.error('Select an Admin first')
             return
-        }
+        }        
 
         const adminToAssign = adminGroupData
             .filter((a, index, self) =>
@@ -365,71 +366,147 @@ export default function Manage() {
             return
         }
 
-        setFilteredAdminGroupData(prev =>
-            prev.map(item =>
-                item.DEPT_CODE === selected.DEPT_CODE
-                    ? {
-                        ...item,
-                        USERNAME: adminToAssign.USERNAME,
-                        GROUP_CODE: adminToAssign.GROUP_CODE,
-                        NAME: adminToAssign.NAME,
-                        EMAIL: adminToAssign.EMAIL,
-                        MOBILE: adminToAssign.MOBILE
-                    }
-                    : item
-            )
-        )
+        setEnrollLoading(true)
 
-        setFilteredAdminGroupData(prev =>
-            [...prev].sort((a, b) =>
-                (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
-                (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
-                (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
-            )
-        )
+        try {
 
-        setBlankAdminGroupData(prev =>
-            prev.filter(item => item.DEPT_CODE !== selected.DEPT_CODE)
-        )
+            const res = await fetch(
+                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        formData: {
+                            groupCode: adminToAssign.GROUP_CODE,
+                            deptCode: selected.DEPT_CODE,
+                            policyno: user?.POLICY_NO,
+                            type: 'ADD'
+                        },
+                    })
+                }
+            )
+
+            const data = await res.json()
+
+            if (data?.status === 200) {
+
+                setFilteredAdminGroupData(prev =>
+                    prev.map(item =>
+                        item.DEPT_CODE === selected.DEPT_CODE
+                            ? {
+                                ...item,
+                                USERNAME: adminToAssign.USERNAME,
+                                GROUP_CODE: adminToAssign.GROUP_CODE,
+                                NAME: adminToAssign.NAME,
+                                EMAIL: adminToAssign.EMAIL,
+                                MOBILE: adminToAssign.MOBILE
+                            }
+                            : item
+                    )
+                )
+
+                setFilteredAdminGroupData(prev =>
+                    [...prev].sort((a, b) =>
+                        (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
+                        (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
+                        (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
+                    )
+                )
+
+                setBlankAdminGroupData(prev =>
+                    prev.filter(item => item.DEPT_CODE !== selected.DEPT_CODE)
+                )
+
+            } else {
+                toast.error(`Cannot Add admin to this Department: ${data?.message}`)
+            }
+
+
+        } catch (error) {
+            toast.error(`Cannot Add admin to this Department: ${error}`)
+        } finally {
+            setEnrollLoading(false)
+        }
 
     }
 
-    const handleAdminRemove = (admin) => {
+    const handleAdminRemove = async (admin) => {
 
-        setFilteredAdminGroupData(prev =>
-            prev.map(item =>
-                item.DEPT_CODE === admin.DEPT_CODE
-                    ? {
-                        ...item,
-                        USERNAME: null,
-                        GROUP_CODE: null,
-                        NAME: null,
-                        EMAIL: null,
-                        MOBILE: null
-                    }
-                    : item
-            ).sort((a, b) =>
-                (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
-                (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
-                (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
+        setEnrollLoading(true)
+
+        try {
+
+            const res = await fetch(
+                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        formData: {
+                            groupCode: admin.GROUP_CODE,
+                            deptCode: admin.DEPT_CODE,
+                            policyno: user?.POLICY_NO,
+                            type: 'REMOVE'
+                        },
+                    })
+                }
             )
-        )
 
-        const blankItem = {
-            ...admin,
-            USERNAME: null,
-            GROUP_CODE: null
+            const data = await res.json()
+
+            if (data?.status === 200) {
+
+                setFilteredAdminGroupData(prev =>
+                    prev.map(item =>
+                        item.DEPT_CODE === admin.DEPT_CODE
+                            ? {
+                                ...item,
+                                USERNAME: null,
+                                GROUP_CODE: null,
+                                NAME: null,
+                                EMAIL: null,
+                                MOBILE: null
+                            }
+                            : item
+                    ).sort((a, b) =>
+                        (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
+                        (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
+                        (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
+                    )
+                )
+
+                const blankItem = {
+                    ...admin,
+                    USERNAME: null,
+                    GROUP_CODE: null
+                }
+
+                setBlankAdminGroupData(prev => {
+                    if (prev.some(p => p.DEPT_CODE === admin.DEPT_CODE)) return prev
+                    return [...prev, blankItem]
+                        .sort((a, b) => (
+                            (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
+                            (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
+                            (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
+                        ))
+                })
+
+            } else {
+                toast.error(`Cannot Add admin to this Department: ${data?.message}`)
+            }
+
+
+        } catch (error) {
+            toast.error(`Cannot Add admin to this Department: ${error}`)
+        } finally {
+            setEnrollLoading(false)
         }
-
-        setBlankAdminGroupData(prev => {
-            if (prev.some(p => p.DEPT_CODE === admin.DEPT_CODE)) return prev
-            return [...prev, blankItem]
-                .sort((a, b) => (
-                    (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
-                    (a.FACULTY ?? "").localeCompare(b.FACULTY ?? "") ||
-                    (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
-                ))
-        })
 
     }
 
@@ -670,8 +747,38 @@ export default function Manage() {
                                         className="text-slate-300 text-sm border-b border-slate-700/50 hover:bg-slate-800/40 hover:shadow-[0_0_25px_rgba(0,255,255,0.25)] transition text-center"
                                     >
                                         <td className="py-3 px-4">
-                                            {a.USERNAME && <FaTrash className='fill-pink-400 cursor-pointer' onClick={() => handleAdminRemove(a)} />}
-                                            {admin && !a.USERNAME && <FaPlusCircle className='fill-teal-400 cursor-pointer' onClick={() => handleAdminAdd(a)} />}
+
+                                            {
+                                                enrollLoading &&
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <svg
+                                                        className="animate-spin h-5 w-5 text-white"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <circle
+                                                            className="opacity-25"
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                            stroke="currentColor"
+                                                            strokeWidth="4"
+                                                        ></circle>
+                                                        <path
+                                                            className="opacity-75"
+                                                            fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                        ></path>
+                                                    </svg>
+                                                    <span>Enrolling...</span>
+                                                </div>
+
+                                            }
+
+                                            {!enrollLoading && a.USERNAME && <FaTrash className='fill-pink-400 cursor-pointer' onClick={() => handleAdminRemove(a)} />}
+                                            {!enrollLoading && admin && !a.USERNAME && <FaPlusCircle className='fill-teal-400 cursor-pointer' onClick={() => handleAdminAdd(a)} />}
+
                                         </td>
                                         <td className="py-3 px-4">{idx + 1}</td>
                                         <td className="py-3 px-4 text-emerald-400">{a.USERNAME}</td>

@@ -17,7 +17,7 @@ export default function DashboardLayout({ children, userInfo, onLogout }) {
 
         {/* Top Navbar */}
         <header className="flex items-center justify-between px-2 py-3 bg-gray-900 border-b border-gray-700">
-          <div className="flex gap-1.5 items-center">
+          <div className="flex gap-1.5 items-center z-50">
             {!sidebarOpen && (
               <FaBars
                 className="p-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition"

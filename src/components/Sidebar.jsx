@@ -21,14 +21,14 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     let menus;
 
     if (groupCode === "100") {
-        menus = [ "Manage", "Missing Info" ];
+        menus = ["Manage", "Missing Info"];
     } else if (groupCode === "0") {
-        menus = [ "Profile", "Health Card" ];
+        menus = ["Profile", "Health Card"];
     } else {
-        menus = [ "Profile" ];
+        menus = ["Profile"];
     }
 
-    menus.push( "FAQ", "Hospitals", "New Claim" )
+    menus.push("FAQ", "Hospitals", "New Claim")
 
     menus.sort()
 
@@ -44,8 +44,11 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     return (
         <aside
-            className={`h-full bg-gray-800 border-r border-gray-700 transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-0"
-                } overflow-hidden flex flex-col z-40`}
+            className={`absolute left-0 top-0 h-full w-64
+            bg-gray-800 border-r border-gray-700
+            transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            overflow-hidden flex flex-col z-40`}
         >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 text-sm">
