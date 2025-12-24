@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import toast, { Toaster } from "react-hot-toast"
 import SearchableSelect from "../components/SearchableSelect"
 import { useUser } from "../context/UserContext"
@@ -11,13 +11,12 @@ export default function Missing() {
 
     const handleTypeChange = async (e) => {
         const type = e.target.value
-        
-        if(type){
+
+        if (type) {
 
             setLoading(true)
 
-            try 
-            {
+            try {
                 const res = await fetch(
                     `http://localhost:5001/api/grpclaimportal/missing?policyno=${user.POLICY_NO}&type=${type}`,
                     {
@@ -26,17 +25,18 @@ export default function Missing() {
                     }
                 )
 
-                const data = await res.json()
+                const data = await res.text()
 
                 console.log(data);
-                
-                
+
+
             } catch (error) {
                 toast.error(`Cannot get Data: ${error}`)
             } finally {
                 setLoading(false)
             }
         }
+
     }
 
     return (
