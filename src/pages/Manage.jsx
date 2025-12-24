@@ -33,6 +33,7 @@ export default function Manage() {
     })
 
     const [adminGroupData, setAdminGroupData] = useState([])
+    const [nonAdminGroupData, setNonAdminGroupData] = useState([])
     const [filteredAdminGroupData, setFilteredAdminGroupData] = useState([])
 
     const [blankGroupData, setBlankAdminGroupData] = useState([])
@@ -65,6 +66,8 @@ export default function Manage() {
             if (data?.status === 200) {
 
                 setAdminGroupData(data?.result?.adminData)
+                setNonAdminGroupData(data?.result?.nonAdminData)
+
                 setFilteredAdminGroupData(data?.result?.adminData
                     .sort((a, b) => (
                         (a.USERNAME ?? "").localeCompare(b.USERNAME ?? "") ||
@@ -72,8 +75,6 @@ export default function Manage() {
                         (a.DEPARTMENT ?? "").localeCompare(b.DEPARTMENT ?? "")
                     ))
                 )
-
-                console.log(data?.result?.adminData)
 
                 const blankGroup = data?.result?.adminData
                     .filter(item =>
@@ -89,7 +90,7 @@ export default function Manage() {
 
                 const adminPairs = [
                     ...new Map(
-                        data?.result?.adminData.map(item => [
+                        data?.result?.nonAdminData.map(item => [
                             item.USERNAME,
                             { value: item.USERNAME, label: item.NAME }
                         ])
@@ -342,7 +343,7 @@ export default function Manage() {
             return
         }        
 
-        const adminToAssign = adminGroupData
+        const adminToAssign = nonAdminGroupData
             .filter((a, index, self) =>
                 a.USERNAME === admin &&
                 index === self.findIndex(item => item.USERNAME === a.USERNAME)
