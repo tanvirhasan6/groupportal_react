@@ -5,6 +5,7 @@ import { io } from "socket.io-client"
 import { UserContext } from "./context/UserContext"
 import ClaimDetails from "./pages/ClaimDetails";
 import Manage from "./pages/Manage";
+import Missing from "./pages/Missing";
 const Login = lazy(() => import("./pages/Login"));
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -114,7 +115,7 @@ export default function App() {
               <Route path="healthcard" element={<HealthCarePage />} />
               <Route path="hospitals" element={<HospitalPage />} />
               <Route path="manage" element={<Manage />} />
-              <Route path="missing" element={<ClaimsPage />} />
+              <Route path="missinginfo" element={<Missing />} />
               <Route path="faq" element={<FaqPage />} />
               <Route path="claimDetails" element={<ClaimDetails />} />
 
