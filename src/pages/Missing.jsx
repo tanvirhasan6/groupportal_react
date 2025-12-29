@@ -9,8 +9,14 @@ export default function Missing() {
 
     const [loading, setLoading] = useState(false)
 
+    const [missingData, setMissingData] = useState([])
+    const [filteredData, setFilteredData] = useState([])
+
+    const [searchTxt, setSearchTxt] = useState('')
+
     const handleTypeChange = async (e) => {
         const type = e.target.value
+        setMissingData([])
 
         if (type) {
 
@@ -25,9 +31,17 @@ export default function Missing() {
                     }
                 )
 
-                const data = await res.text()
+                const data = await res.json()
 
                 console.log(data);
+
+                if (data?.status === 200) {
+                    if (data?.result.length < 1) toast.error(`${type} has no missing data`)
+                    else {
+                        setMissingData(data?.result)
+                        setFilteredData(data?.result)
+                    }
+                }
 
 
             } catch (error) {
@@ -37,6 +51,25 @@ export default function Missing() {
             }
         }
 
+    }
+
+    const handleSearch = (e) => {
+        const search = e.target.value.toLowerCase();
+        setSearchTxt(search);
+
+        if (!search) {
+            setFilteredData(missingData); // show all
+            return;
+        }
+
+        const filtered = missingData.filter(item =>
+            item.NAME.toLowerCase().includes(search) ||
+            item.USERNAME.toLowerCase().includes(search) || 
+            item.EMAIL.toLowerCase().includes(search) || 
+            item.MOBILE.toLowerCase().includes(search)
+        );
+
+        setFilteredData(filtered);
     }
 
     return (
@@ -97,6 +130,67 @@ export default function Missing() {
 
                 </div>
 
+                {
+                    missingData.length > 0 &&
+                    <div className='w-full flex items-center justify-center my-5'>
+                        <input
+                            id="search"
+                            name="search"
+                            type="text"
+                            placeholder="Search by Name/Username/Moible/Email"
+                            value={searchTxt}
+                            inputMode="none"
+                            onChange={handleSearch}
+                            autoComplete='off'
+                            className="
+                                    w-96 appearance-none rounded-xl bg-linear-to-br from-teal-900 via-teal-800 to-teal-900
+                                    text-gray-200 text-sm px-4 py-3 border border-teal-700  backdrop-blur-md
+                                    transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50
+                                    focus:border-cyan-500 hover:border-cyan-400/60
+                                "
+                        />
+                    </div>
+                }
+
+                {
+                    filteredData.length > 0 &&
+                    <div className='w-full p-2 sm:p-4'>                        
+
+                        <div className='relative w-full h-[75vh] overflow-auto futuristic-scrollbar'>
+                            <table className="w-full min-w-max border-collapse rounded-xl backdrop-blur-lg bg-slate-900/50 shadow-[0_0_20px_rgba(0,255,255,0.15)]">
+                                <thead className='sticky top-0'>
+                                    <tr className=" text-cyan-300 text-sm bg-slate-800/95">
+                                        <th className="py-3 px-4 w-8">Sl</th>
+                                        <th className="py-3 px-4">Username</th>
+                                        <th className="py-3 px-4">Name</th>
+                                        <th className="py-3 px-4">Faculty</th>
+                                        <th className="py-3 px-4">Department</th>
+                                        <th className="py-3 px-4">Mobile</th>
+                                        <th className="py-3 px-4">Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        filteredData.map( (a, idx) => (
+                                            <tr
+                                                key={idx}
+                                                className="text-slate-300 text-sm border-b border-slate-700/50 hover:bg-slate-800/40 hover:shadow-[0_0_25px_rgba(0,255,255,0.25)] transition text-center"
+                                            >
+                                                <td className="py-3 px-4">{idx + 1}</td>
+                                                <td className="py-3 px-4 text-emerald-400">{a.USERNAME}</td>
+                                                <td className="py-3 px-4">{a.NAME}</td>
+                                                <td className="py-3 px-4">{a.FACULTY_NAME}</td>
+                                                <td className="py-3 px-4">{a.DEPT_NAME}</td>
+                                                <td className="py-3 px-4">{a.MOBILE}</td>
+                                                <td className="py-3 px-4">{a.EMAIL}</td>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
             </div>
 
         </div>
