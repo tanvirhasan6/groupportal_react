@@ -37,7 +37,7 @@ export default function ClaimDetails() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claimDetails?intno=${i}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claimDetails?intno=${i}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -87,7 +87,7 @@ export default function ClaimDetails() {
 
             const filtered = selectedFiles.filter((file) => {
 
-                console.log(existingFiles);
+                // console.log(existingFiles);
 
 
                 const name = file.name.trim();
@@ -210,7 +210,7 @@ export default function ClaimDetails() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/reUploadDocuments`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/reUploadDocuments`,
                 {
                     method: "POST",
                     body: submissionData,

@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
             try {
                 const res = await fetch(
-                    `http://localhost:5001/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
+                    `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -77,7 +77,7 @@ const ProfilePage = () => {
 
         try {
             const res = await fetch(
-                "http://localhost:5001/api/grpclaimportal/profile/uploadImage",
+                "https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/uploadImage",
                 {
                     method: "POST",
                     body: formData,

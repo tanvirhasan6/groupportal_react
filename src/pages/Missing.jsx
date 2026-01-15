@@ -24,7 +24,7 @@ export default function Missing() {
 
             try {
                 const res = await fetch(
-                    `http://localhost:5001/api/grpclaimportal/missing?policyno=${user.POLICY_NO}&type=${type}`,
+                    `https://app.zenithlifebd.com:5001/api/grpclaimportal/missing?policyno=${user.POLICY_NO}&type=${type}`,
                     {
                         method: "GET",
                         credentials: "include"
@@ -33,7 +33,7 @@ export default function Missing() {
 
                 const data = await res.json()
 
-                console.log(data);
+                // console.log(data);
 
                 if (data?.status === 200) {
                     if (data?.result.length < 1) toast.error(`${type} has no missing data`)

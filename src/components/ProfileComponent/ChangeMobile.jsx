@@ -88,12 +88,12 @@ const ChangeMobile = () => {
 
         try {
             const sendOtp = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mobileChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${mobile}&emailid=${user?.EMAIL}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/mobileChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${mobile}&emailid=${user?.EMAIL}`,
                 { method: 'GET', credentials: 'include' }
             );
 
             const data = await sendOtp.json();
-            console.log(data);
+            // console.log(data);
 
             if (data?.status === 201) {
                 toast.error(data?.message);
@@ -122,7 +122,7 @@ const ChangeMobile = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mobileChangeOTPVerify?otpCode=${code}&mobile=${mobile}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/mobileChangeOTPVerify?otpCode=${code}&mobile=${mobile}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}`,
                 { method: 'GET', credentials: 'include' }
             );
 

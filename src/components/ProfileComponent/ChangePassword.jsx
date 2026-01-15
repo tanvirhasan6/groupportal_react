@@ -36,7 +36,7 @@ const ChangePassword = () => {
         setLoading(true);
 
         try {
-            const res = await fetch(`http://localhost:5001/api/grpclaimportal/profile/passwordUpdate`, {
+            const res = await fetch(`https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/passwordUpdate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -66,7 +66,7 @@ const ChangePassword = () => {
     const handleLogout = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5001/api/grpclaimportal/logout', {
+            const res = await fetch('https://app.zenithlifebd.com:5001/api/grpclaimportal/logout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",

@@ -38,7 +38,7 @@ export default function AdminReporting() {
 
             try {
                 const res = await fetch(
-                    `http://localhost:5001/api/grpclaimportal/adminReportSummary?policyno=${user.POLICY_NO}&stDate=${stDate}&endDate=${endDate}`,
+                    `https://app.zenithlifebd.com:5001/api/grpclaimportal/adminReportSummary?policyno=${user.POLICY_NO}&stDate=${stDate}&endDate=${endDate}`,
                     {
                         method: "GET",
                         credentials: "include"

@@ -74,7 +74,7 @@ const ChangeEmail = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mailChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${user?.MOBILE}&emailid=${email}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/mailChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${user?.MOBILE}&emailid=${email}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -113,7 +113,7 @@ const ChangeEmail = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mailChangeOTPVerify?otpCode=${code}&emailid=${email}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&password=${user?.PASSWORD}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/mailChangeOTPVerify?otpCode=${code}&emailid=${email}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&password=${user?.PASSWORD}`,
                 {
                     method: "GET",
                     credentials: "include",

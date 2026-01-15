@@ -5,7 +5,7 @@ import DeathClaim from "../components/NewClaimComponent/DeathClaim";
 const ClaimForm = () => {
 
     const user = useUser()
-    console.log(user);
+    // console.log(user);
     
 
     return (

@@ -29,7 +29,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/getBanks?banktype=${val}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/getBanks?banktype=${val}`,
                 { method: "GET", credentials: "include" }
             );
 
@@ -63,7 +63,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/getBankBranch?banktype=${bankType}&bankcode=${val}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/getBankBranch?banktype=${bankType}&bankcode=${val}`,
                 { method: "GET", credentials: "include" }
             );
 
@@ -97,7 +97,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/bankUpdate`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/bankUpdate`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

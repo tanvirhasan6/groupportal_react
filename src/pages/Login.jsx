@@ -66,7 +66,7 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
         setError("");
 
         try {
-            const res = await fetch("http://localhost:5001/api/grpclaimportal/checkuser", {
+            const res = await fetch("https://app.zenithlifebd.com:5001/api/grpclaimportal/checkuser", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userid, password }),
@@ -224,7 +224,7 @@ function OTPInput({ onBack, password, userData }) {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/validateOtp?otpCode=${code}&password=${password}&userData=${encodeURIComponent(
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/validateOtp?otpCode=${code}&password=${password}&userData=${encodeURIComponent(
                     JSON.stringify(userData)
                 )}`
             );
@@ -306,7 +306,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:5001/api/grpclaimportal/getPasswordOtp", {
+            const res = await fetch("https://app.zenithlifebd.com:5001/api/grpclaimportal/getPasswordOtp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userData }),

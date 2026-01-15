@@ -157,7 +157,7 @@ const HospitalizationClaim = () => {
         setSlotData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -165,7 +165,7 @@ const HospitalizationClaim = () => {
             );
             const data = await res.json();
             if (data?.status === 404) {
-                console.log("No Slot Found");
+                // console.log("No Slot Found");
 
                 toast.error("No Slot Found");
             }
@@ -181,7 +181,7 @@ const HospitalizationClaim = () => {
         setBenefitData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}&type=H`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -199,7 +199,7 @@ const HospitalizationClaim = () => {
     const diseasesList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/diseases`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/diseases`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -221,7 +221,7 @@ const HospitalizationClaim = () => {
     const hospitalList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/hospitals`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/hospitals`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -318,7 +318,7 @@ const HospitalizationClaim = () => {
 
         try {
             const validate = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/validateClaim?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}&claimType=${formData.claimType}&coverage=${formData.coverage}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/validateClaim?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}&claimType=${formData.claimType}&coverage=${formData.coverage}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -361,7 +361,7 @@ const HospitalizationClaim = () => {
 
                 try {
                     const res = await fetch(
-                        `http://localhost:5001/api/grpclaimportal/claim/submitClaim`,
+                        `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/submitClaim`,
                         {
                             method: "POST",
                             body: submissionData,

@@ -54,7 +54,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/manage/alldeptfacultyadmin?policyno=${user.POLICY_NO}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/alldeptfacultyadmin?policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include"
@@ -147,7 +147,7 @@ export default function Manage() {
     const handleValidate = async (type, val) => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/manage/validationCount?type=${type}&value=${val}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/validationCount?type=${type}&value=${val}`,
                 {
                     method: "GET",
                     credentials: "include"
@@ -247,7 +247,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/manage/enrollAdmin`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/enrollAdmin`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -269,7 +269,7 @@ export default function Manage() {
 
             const data = await res.json()
 
-            console.log(data)
+            // console.log(data)
 
             if (data?.status === 200) {
                 toast.success('Admin Enrolled Successfully')
@@ -313,7 +313,7 @@ export default function Manage() {
 
     const handleFacultyChange = (value) => {
         setFaculty(value)
-        console.log(value);
+        // console.log(value);
 
         if (!value) {
             setFilteredAdminGroupData(adminGroupData)
@@ -372,7 +372,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/updateAdmin`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -441,7 +441,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/updateAdmin`,
                 {
                     method: "POST",
                     credentials: "include",

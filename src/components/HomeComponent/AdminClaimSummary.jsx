@@ -7,6 +7,7 @@ import AnimateNumber from '../AnimatedNumber'
 export default function AdminClaimSummary() {
 
     const user = useUser()
+    
     const [loading, setLoading] = useState(false)
 
     const [summaryData, setSummaryData] = useState([])
@@ -20,9 +21,10 @@ export default function AdminClaimSummary() {
             let grpCode;
 
             if (user.GROUP_CODE === '100') grpCode = ''
+            else grpCode = user.GROUP_CODE
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/adminClaimSummary?policyno=${user.POLICY_NO}&groupCode=${grpCode}`,
+                `https://app.zenithlifebd.com:5001/api/grpclaimportal/adminClaimSummary?policyno=${user.POLICY_NO}&groupCode=${grpCode}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -36,7 +38,7 @@ export default function AdminClaimSummary() {
             else toast.error(data?.message)
             setLoading(false)
         } catch (error) {
-            toast.error('Please Try again')
+            toast.error(`Please Try again ${error}`)
             setLoading(false)
         }
     }
