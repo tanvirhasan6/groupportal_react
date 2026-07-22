@@ -23,22 +23,39 @@ const Skeleton = () => (
   </div>
 )
 
-const getUserFromCookie = () => {
-  const cookie = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("user_info="));
-  if (!cookie) return null;
-  try {
-    const parsed = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-    return parsed.USERNAME ? parsed : null;
-  } catch {
-    return null;
-  }
-}
 
 export default function App() {
 
-  const [userInfo, setUserInfo] = useState(getUserFromCookie())
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const refreshUser = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5001/api/grpclaimportal/current-user",
+        {
+          credentials: "include",
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.status === 200) {
+        setUserInfo(data.result);
+      } else {
+        setUserInfo(null);
+      }
+    } catch (error) {
+      console.error("User Validating failed:", error)
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
 
   // ----------------------------------------------------
   // SINGLE TAB SOCKET PROTECTION
@@ -46,9 +63,9 @@ export default function App() {
   useEffect(() => {
     if (!userInfo?.USERNAME) return;
 
-    const socket = io("https://app.zenithlifebd.com:5001", {
-      query: { 
-        userId: userInfo.USERNAME, 
+    const socket = io("http://localhost:5001", {
+      query: {
+        userId: userInfo.USERNAME,
         clientApp: "claimPortal",
       },
       transports: ["websocket"],
@@ -69,7 +86,7 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("https://app.zenithlifebd.com:5001/api/grpclaimportal/logout", {
+      const res = await fetch("http://localhost:5001/api/grpclaimportal/logout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid: userInfo.USERNAME }),
@@ -86,6 +103,10 @@ export default function App() {
     }
   }
 
+  if (loading) {
+    return <Skeleton />;
+  }
+
   return (
     <UserContext.Provider value={userInfo}>
       <BrowserRouter>
@@ -93,7 +114,7 @@ export default function App() {
           <Routes>
             <Route
               path="/login"
-              element={userInfo ? <Navigate to="/dashboard" /> : <Login onLogin={setUserInfo} />}
+              element={userInfo ? <Navigate to="/dashboard" /> : <Login onLogin={refreshUser} />}
             />
 
             {/* Dashboard layout with nested routes */}
@@ -107,11 +128,11 @@ export default function App() {
                 )
               }
             >
-              
+
               <Route index element={<DashboardPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="newclaim" element={<ClaimsPage />} />
-              
+
               <Route path="healthcard" element={<HealthCarePage />} />
               <Route path="hospitals" element={<HospitalPage />} />
               <Route path="manage" element={<Manage />} />

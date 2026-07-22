@@ -1,6 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+
+import SearchableSelect from "../components/SearchableSelect";
 
 export default function Login({ onLogin }) {
     const [screen, setScreen] = useState("login");
@@ -14,11 +17,14 @@ export default function Login({ onLogin }) {
                     {screen === "login" && (
                         <LogIn
                             onForgot={() => setScreen("forgot")}
-                            onSuccess={(data) => {
+                            onPassword={(data) => {
                                 setUserData(data);
                                 setScreen("set");
                             }}
-                            onLogin={onLogin}
+                            onSuccess={(data) => {
+                                setUserData(data);
+                                setScreen("password");
+                            }}
                         />
                     )}
 
@@ -45,6 +51,15 @@ export default function Login({ onLogin }) {
                             setPassword={setPassword}
                         />
                     )}
+
+                    {screen === "password" && (
+                        <PasswordLogin
+                            userData={userData}
+                            onLogin={onLogin}
+                            onBack={() => setScreen("login")}
+                        />
+                    )}
+
                 </div>
             </div>
         </div>
@@ -53,12 +68,39 @@ export default function Login({ onLogin }) {
 
 // -------------------------------------------------------------------
 
-function LogIn({ onForgot, onSuccess, onLogin }) {
-    const navigate = useNavigate();
+function LogIn({ onForgot, onPassword, onSuccess, }) {
+
     const [userid, setUserid] = useState("");
-    const [password, setPassword] = useState("");
+    const [policyno, setPolicyno] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const [policyList, setPolicyList] = useState([])
+
+    const policyData = async () => {
+        try {
+            const res = await fetch(
+                `http://localhost:5001/api/grpclaimportal/policyList`,
+                {
+                    method: "GET",
+                }
+            );
+            const data = await res.json();
+            if (data?.status === 200) {
+                const formatted = (data.result || []).map((item) => ({
+                    value: item.POLICY_NO,
+                    label: item.ORGANIZATION,
+                }));
+                setPolicyList(formatted);
+            }
+        } catch (error) {
+            toast.error(`${error}`);
+        }
+    }
+
+    useEffect(() => {
+        policyData()
+    }, [])
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -66,30 +108,29 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
         setError("");
 
         try {
-            const res = await fetch("https://app.zenithlifebd.com:5001/api/grpclaimportal/checkuser", {
+            const res = await fetch("http://localhost:5001/api/grpclaimportal/checkuserPassword", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userid, password }),
-                credentials: "include",
+                body: JSON.stringify({ userid, policyno }),
             });
 
             const data = await res.json();
 
-            if (data?.status === 200) {
+            console.log(data);
 
-                onLogin(data.result || { USERNAME: userid });
-
-                // Navigate
-                navigate("/dashboard", { replace: true });
-                return;
-            }
 
             if (data?.status === 201) {
-                onSuccess(data.result);
+                onPassword({ userid, policyno, });
                 return;
             }
 
-            setError(data?.message || "Login failed");
+            if (data?.status === 200) {
+                onSuccess({ userid, policyno, });
+                return;
+            }
+
+            setError(data?.message || "Not Found!");
+
         } catch (err) {
             setError(err.message || "Something went wrong");
         }
@@ -100,12 +141,29 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
     return (
         <div>
             <h2 className="text-2xl font-semibold text-center mb-6 bg-linear-to-r from-cyan-400 to-fuchsia-400 bg-clip-text text-transparent">
-                Welcome Back
+                Group Claim Panel
             </h2>
 
             <form className="space-y-5" onSubmit={handleLogin} autoComplete="off">
+
+                <div className='col-span-4'>
+                    <SearchableSelect
+                        label="Policy List"
+                        options={policyList}
+                        value={policyno}
+                        onChange={
+                            (val) => {
+                                const selected = policyList.find(d => d.value === val)
+                                setPolicyno(selected.value)
+                            }
+                        }
+                        placeholder="Select Policy"
+                        disabled={false}
+                        onFocus={(e) => e.target.select()}
+                    />
+                </div>
                 <div>
-                    <label className="text-sm text-gray-300">Userid / Mobile</label>
+                    <label className="text-sm text-gray-300">Id/Code</label>
                     <input
                         type="text"
                         placeholder="Enter your userid or mobile"
@@ -116,7 +174,7 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                     />
                 </div>
 
-                <div>
+                {/* <div>
                     <label className="text-sm text-gray-300">Password</label>
                     <input
                         type="password"
@@ -126,9 +184,11 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                         onChange={(e) => setPassword(e.target.value)}
                         autoComplete="new-password"
                     />
-                </div>
+                </div> */}
 
                 {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+                <p className="text-red-400 underline cursor-pointer text-end" onClick={onForgot}>Forget Password ?</p>
 
                 <button
                     disabled={loading}
@@ -162,7 +222,7 @@ function LogIn({ onForgot, onSuccess, onLogin }) {
                     ) : (
                         'Log In'
                     )}
-                </button>               
+                </button>
 
                 <span className="text-xs text-red-400 text-justify">
                     সকলের অবগতির জন্য জানানে যাচ্ছে যে, নিজ নামের ব্যাংক বা মোবাইল ব্যাংকিং একাউন্ট না দেয়া, ব্যাংক একাউন্টের নামে গড়মিল, ব্যাংক শাখার নামে গড়মিল, ভুল একাউন্ট নাম্বার, মোবাইল ব্যাংকিং একাউন্টের কেওয়াইসি আপডেট না থাকার কারণে অনেকের বীমা দাবির টাকা ফেরত চলে আসছে বা পরিশোধে বিলম্ব হচ্ছে। তাই নিজ নামের ব্যাংক একাউন্টের সঠিক তথ্য দেয়ার জন্য অনুরোধ করছি।
@@ -224,9 +284,17 @@ function OTPInput({ onBack, password, userData }) {
 
         try {
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/validateOtp?otpCode=${code}&password=${password}&userData=${encodeURIComponent(
-                    JSON.stringify(userData)
-                )}`
+                `http://localhost:5001/api/grpclaimportal/validateOtp`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        otpCode: code,
+                        password,
+                        userid: userData.userid,
+                        policyno: userData.policyno,
+                    }),
+                }
             );
 
             const data = await res.json();
@@ -305,11 +373,17 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
 
         setLoading(true);
 
+        console.log(userData);
+
+
         try {
-            const res = await fetch("https://app.zenithlifebd.com:5001/api/grpclaimportal/getPasswordOtp", {
+            const res = await fetch("http://localhost:5001/api/grpclaimportal/getPasswordOtp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userData }),
+                body: JSON.stringify({
+                    userid: userData.userid,
+                    policyno: userData.policyno
+                }),
             });
 
             const data = await res.json();
@@ -376,8 +450,186 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
                 <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline">
                     Back
                 </button>
-                
+
             </form>
+        </div>
+    );
+}
+
+
+// -------------------------------------------------------------------
+
+function PasswordLogin({ userData, onBack, onLogin }) {
+
+    const navigate = useNavigate();
+
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+
+        if (!password.trim()) {
+            setError("Please enter your password.");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        try {
+
+            const res = await fetch(
+                "http://localhost:5001/api/grpclaimportal/checkuser",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        userid: userData.userid,
+                        policyno: userData.policyno,
+                        password,
+                    }),
+                }
+            );
+
+            const data = await res.json();
+
+            if (data.status === 200) {
+
+                await onLogin();
+
+                // Navigate
+                navigate("/dashboard", { replace: true });
+
+                return;
+            }
+
+            setError(data.message || "Invalid password.");
+
+        } catch (err) {
+
+            setError(err.message || "Something went wrong.");
+
+        }
+
+        setLoading(false);
+    };
+
+    return (
+        <div>
+
+            <p className="text-sm text-gray-400 text-center mb-6">Enter your password to continue.</p>
+
+            <form
+                onSubmit={handleLogin}
+                className="space-y-5"
+                autoComplete="off"
+            >
+
+                <div>
+                    <label className="text-sm text-gray-300">
+                        User ID
+                    </label>
+
+                    <input
+                        disabled
+                        value={
+                            userData.USERID ||
+                            userData.USERNAME ||
+                            userData.userid
+                        }
+                        className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-700 border border-gray-700 text-gray-400 cursor-not-allowed"
+                    />
+                </div>
+
+                <div className="relative">
+
+                    <label className="text-sm text-gray-300">
+                        Password
+                    </label>
+
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="********"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete="new-password"
+                        className="w-full mt-1 px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-400 outline-none transition"
+                    />
+
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-[38px] text-gray-400 hover:text-white"
+                    >
+                        {showPassword ? (
+                            <EyeOff size={18} />
+                        ) : (
+                            <Eye size={18} />
+                        )}
+                    </button>
+
+                </div>
+
+                {error && (
+                    <p className="text-red-400 text-sm text-center">
+                        {error}
+                    </p>
+                )}
+
+                <button
+                    disabled={loading}
+                    type="submit"
+                    className="w-full py-3 rounded-lg bg-linear-to-r from-cyan-500 to-fuchsia-500 hover:opacity-90 transition font-medium"
+                >
+                    {loading ? (
+                        <div className="flex items-center justify-center gap-2">
+
+                            <svg
+                                className="animate-spin h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                />
+
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                            </svg>
+
+                            <span>Logging in...</span>
+
+                        </div>
+                    ) : (
+                        "Continue"
+                    )}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="w-full py-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition"
+                >
+                    Back
+                </button>
+
+            </form>
+
         </div>
     );
 }

@@ -40,7 +40,7 @@ export default function DashboardLayout({ children, userInfo, onLogout }) {
               className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-800"
             >
               <img
-                src={`https://app.zenithlifebd.com/web_docs/${userInfo?.USERNAME}.jpg`}
+                src={`http://localhost/web_docs/${userInfo?.USERNAME}.jpg`}
                 alt="Profile"
                 className="w-8 h-8 rounded-full border border-gray-700"
               />

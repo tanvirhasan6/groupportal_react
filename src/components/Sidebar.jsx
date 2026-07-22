@@ -54,7 +54,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <div className="flex items-center justify-between px-5 py-4 text-sm">
                 <div className="flex flex-col items-center gap-3">
                     <img
-                        src={`https://app.zenithlifebd.com/admin/img/${user?.POLICY_NO}.png`}
+                        src={`http://localhost/admin/img/${user?.POLICY_NO}.png`}
                         alt="User Logo"
                     />
                     <h2 className={`font-semibold text-gray-400 ${sidebarOpen ? "" : "hidden"}`}>

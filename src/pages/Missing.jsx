@@ -24,7 +24,7 @@ export default function Missing() {
 
             try {
                 const res = await fetch(
-                    `https://app.zenithlifebd.com:5001/api/grpclaimportal/missing?policyno=${user.POLICY_NO}&type=${type}`,
+                    `http://localhost:5001/api/grpclaimportal/missing?policyno=${user.POLICY_NO}&type=${type}`,
                     {
                         method: "GET",
                         credentials: "include"

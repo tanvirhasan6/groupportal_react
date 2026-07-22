@@ -15,7 +15,7 @@ export default function InfoDoc() {
 
         try {
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/infoDocList?policyno=${user?.POLICY_NO}`,
+                `http://localhost:5001/api/grpclaimportal/infoDocList?policyno=${user?.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -93,7 +93,7 @@ export default function InfoDoc() {
                                 }}
                             >
                                 <img
-                                    src={`https://app.zenithlifebd.com/zilil_group/file/${selectedDoc.PIC_NAME_ID}.jpg`}
+                                    src={`http://localhost/zilil_group/file/${selectedDoc.PIC_NAME_ID}.jpg`}
                                     alt={selectedDoc.DOC_NAME}
                                     className="transition-transform duration-300 ease-in-out"
                                     style={{

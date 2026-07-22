@@ -6,12 +6,12 @@ import toast, { Toaster } from "react-hot-toast"
 export default function ClaimDetails() {
 
     const user = useUser()
-    
+
     const { state } = useLocation()
     const navigate = useNavigate()
     const [intno, setIntno] = useState()
     const [detailData, setDetailData] = useState({})
-    const [loading, setLoading] = useState(false)
+    const [working, setWorking] = useState(false)
 
     const [basicData, setBasicData] = useState({})
     const [additionalData, setadditionalData] = useState([])
@@ -28,16 +28,16 @@ export default function ClaimDetails() {
     const [dischargeFiles, setDischargeFiles] = useState([]);
     const [otherFiles, setOtherFiles] = useState([]);
 
-    const baseURL = "https://app.zenithlifebd.com/web_docs/"
+    const baseURL = "http://localhost/web_docs/"
 
     const getDetails = async (i) => {
 
-        setLoading(true)
+        setWorking(true)
 
         try {
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claimDetails?intno=${i}`,
+                `http://localhost:5001/api/grpclaimportal/claimDetails?intno=${i}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -60,7 +60,7 @@ export default function ClaimDetails() {
         } catch (error) {
             toast.error(error)
         } finally {
-            setLoading(false)
+            setWorking(false)
         }
     }
 
@@ -74,6 +74,61 @@ export default function ClaimDetails() {
         }
 
     }, [])
+
+    const downloadReceiptPdf = async () => {
+        setWorking(true)
+        try {
+            const response = await fetch(
+                "http://localhost:5001/api/grpclaimportal/claimSettlementReport",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        policyno: user?.POLICY_NO,
+                        intno,
+                        beneficiary: user?.USERNAME,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to generate PDF");
+            }
+
+            const blob = await response.blob();
+
+            // Get filename from Content-Disposition header
+            let filename = `Claim-Settlement-Receipt_${intno}.pdf`;
+
+            const disposition = response.headers.get("Content-Disposition");
+            if (disposition) {
+                const match = disposition.match(/filename="?([^"]+)"?/);
+                if (match) {
+                    filename = match[1];
+                }
+            }
+
+            // Download
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error(err);
+            alert("Unable to download PDF");
+        } finally {
+            setWorking(false)
+        }
+    };
 
     const FileInput = ({ label, files, setFiles }) => {
 
@@ -189,12 +244,12 @@ export default function ClaimDetails() {
 
     const handleSubmit = async (e) => {
 
-        setLoading(true)
+        setWorking(true)
         e.preventDefault()
 
         if (allSelectedFiles.length === 0) {
             toast.error("Please attach at least one document before submitting.")
-            setLoading(false)
+            setWorking(false)
             return
         }
 
@@ -210,7 +265,7 @@ export default function ClaimDetails() {
 
         try {
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claim/reUploadDocuments`,
+                `http://localhost:5001/api/grpclaimportal/claim/reUploadDocuments`,
                 {
                     method: "POST",
                     body: submissionData,
@@ -238,13 +293,13 @@ export default function ClaimDetails() {
 
             } catch {
                 console.error("Invalid JSON:", text)
-                setLoading(false)
+                setWorking(false)
                 return
             }
 
         } catch (err) {
             toast.error(`Upload failed: ${err}`)
-            setLoading(false)
+            setWorking(false)
         }
     }
 
@@ -254,9 +309,10 @@ export default function ClaimDetails() {
             <Toaster />
             <FullImageModal />
 
-            {loading && <div>....</div>}
+            {working && <div>....</div>}
 
-            {!loading &&
+
+            {!working &&
 
                 <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 sm:p-8 space-y-8">
 
@@ -264,7 +320,7 @@ export default function ClaimDetails() {
 
                     <div className='w-full'>
 
-                        { user?.GROUP_CODE === '0' && basicData.STATUS === 8 && (
+                        {user?.GROUP_CODE === '0' && basicData.STATUS === 8 && (
                             <div className='w-full mb-5'>
 
                                 {/* Additional Document Description */}
@@ -293,10 +349,10 @@ export default function ClaimDetails() {
                                         <button
                                             type="submit"
                                             className="px-8 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold text-sm rounded-md shadow-md transition-all hover:scale-105"
-                                            disabled={loading}
+                                            disabled={working}
                                         >
                                             {
-                                                loading ? (
+                                                working ? (
                                                     <div className="flex items-center justify-center gap-2">
                                                         <svg
                                                             className="animate-spin h-5 w-5 text-white"
@@ -360,6 +416,50 @@ export default function ClaimDetails() {
                                 <DetailRow label="Remarks" value={basicData.REMARKS} />
                             </div>
                         </div>
+
+                        {
+                            (basicData.STATUS === 5 || basicData.STATUS === 6) &&
+                            <div className='w-full my-5 flex items-center'>
+
+                                <button
+                                    className="px-8 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold text-sm rounded-md shadow-md transition-all hover:scale-105"
+                                    onClick={downloadReceiptPdf}
+                                    type="button"
+                                >
+                                    {working ? (
+                                        <div className="flex items-center justify-center gap-2">
+
+                                            <svg
+                                                className="animate-spin h-5 w-5 text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                />
+
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                />
+                                            </svg>
+
+                                            <span>Downloading...</span>
+
+                                        </div>
+                                    ) : (
+                                        "Download Settlement Receipt"
+                                    )}
+                                </button>
+                            </div>
+                        }
 
                         {
                             coverageData?.length > 0 &&
@@ -473,7 +573,6 @@ export default function ClaimDetails() {
 
                             </div>
                         }
-
 
                     </div>
 

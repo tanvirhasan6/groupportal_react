@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
             try {
                 const res = await fetch(
-                    `https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
+                    `http://localhost:5001/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -52,7 +52,7 @@ const ProfilePage = () => {
         }
 
         if (userid) {
-            setImageSrc(`https://app.zenithlifebd.com/web_docs/${userid}.jpg`)
+            setImageSrc(`http://localhost/web_docs/${userid}.jpg`)
             fetchBankData()
         }
 
@@ -77,7 +77,7 @@ const ProfilePage = () => {
 
         try {
             const res = await fetch(
-                "https://app.zenithlifebd.com:5001/api/grpclaimportal/profile/uploadImage",
+                "http://localhost:5001/api/grpclaimportal/profile/uploadImage",
                 {
                     method: "POST",
                     body: formData,

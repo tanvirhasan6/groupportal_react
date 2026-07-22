@@ -24,7 +24,7 @@ export default function AdminClaimSummary() {
             else grpCode = user.GROUP_CODE
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/adminClaimSummary?policyno=${user.POLICY_NO}&groupCode=${grpCode}`,
+                `http://localhost:5001/api/grpclaimportal/adminClaimSummary?policyno=${user.POLICY_NO}&groupCode=${grpCode}`,
                 {
                     method: "GET",
                     credentials: "include",

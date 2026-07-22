@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from "../../context/UserContext"
 import CircleProgress from "./CircleProgress"
+import toast from 'react-hot-toast'
 
 export default function BeneficiaryClaimSummary({ percent }) {
 
     const user = useUser()
+    console.log(user);
+    
     const [claimUsageData, setClaimUsageData] = useState([])
 
     const usagelist = async () => {
 
         try {
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/claimUsageData?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}`,
+                `http://localhost:5001/api/grpclaimportal/claimUsageData?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",

@@ -54,7 +54,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/alldeptfacultyadmin?policyno=${user.POLICY_NO}`,
+                `http://localhost:5001/api/grpclaimportal/manage/alldeptfacultyadmin?policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include"
@@ -147,7 +147,7 @@ export default function Manage() {
     const handleValidate = async (type, val) => {
         try {
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/validationCount?type=${type}&value=${val}`,
+                `http://localhost:5001/api/grpclaimportal/manage/validationCount?type=${type}&value=${val}`,
                 {
                     method: "GET",
                     credentials: "include"
@@ -247,7 +247,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/enrollAdmin`,
+                `http://localhost:5001/api/grpclaimportal/manage/enrollAdmin`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -372,7 +372,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/updateAdmin`,
+                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
                 {
                     method: "POST",
                     credentials: "include",
@@ -441,7 +441,7 @@ export default function Manage() {
         try {
 
             const res = await fetch(
-                `https://app.zenithlifebd.com:5001/api/grpclaimportal/manage/updateAdmin`,
+                `http://localhost:5001/api/grpclaimportal/manage/updateAdmin`,
                 {
                     method: "POST",
                     credentials: "include",
