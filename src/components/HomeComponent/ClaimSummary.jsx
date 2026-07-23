@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from "../../context/UserContext"
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { FcDecision } from 'react-icons/fc';
 import Pagination from "../../components/Pagination"
 import { useNavigate } from 'react-router-dom';
@@ -119,7 +119,7 @@ export default function ClaimSummary() {
 
     return (
         <div className='w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-6 shadow-lg mt-6'>
-            <Toaster />
+            {/* <Toaster /> */}
 
             <div className='w-full flex flex-col items-center gap-3 md:hidden'>
                 {

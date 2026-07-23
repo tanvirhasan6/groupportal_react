@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from "../../context/UserContext"
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { FaImage } from 'react-icons/fa';
 
 export default function InfoDoc() {
@@ -41,7 +41,7 @@ export default function InfoDoc() {
     return (
         <>
             <div className="w-full bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg text-slate-400">
-                <Toaster />
+                {/* <Toaster /> */}
                 <h3 className='font-bold text-left mb-2 text-teal-400 text-lg'>Info</h3>
                 <div className='flex flex-col gap-2 text-sm'>
                     {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useUser } from "../context/UserContext"
 
 function decodeUnicode(str) {
@@ -73,7 +73,7 @@ export default function Faq() {
 
     return (
         <div className="space-y-4 p-4 min-h-screen">
-            <Toaster />
+            {/* <Toaster /> */}
             <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-purple-600 mb-6 text-center">
                 FAQ
             </h1>

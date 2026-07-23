@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { useUser } from "../../context/UserContext"; // <-- adjust path as needed
 
 const ChangeMobile = () => {
@@ -147,7 +147,7 @@ const ChangeMobile = () => {
     return (
         <>
             <div className='w-full flex flex-row justify-center items-center gap-2'>
-                <Toaster position="top-center" />
+                {/* <Toaster position="top-center" /> */}
 
                 <input
                     type="tel"

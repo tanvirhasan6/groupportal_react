@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { useUser } from "../../context/UserContext"; // <-- adjust import based on your project
 
 const ChangePassword = () => {
@@ -88,7 +88,7 @@ const ChangePassword = () => {
 
     return (
         <div className='w-full flex flex-col justify-center items-center gap-4 mt-4'>
-            <Toaster position="top-center" />
+            {/* <Toaster position="top-center" /> */}
 
             <div className='w-full flex flex-col sm:flex-row gap-2 items-center justify-center'>
                 <input

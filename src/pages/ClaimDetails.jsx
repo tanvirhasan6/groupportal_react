@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useUser } from "../context/UserContext"
 import { useLocation, useNavigate } from 'react-router-dom'
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast"
 
 export default function ClaimDetails() {
 
@@ -306,7 +306,7 @@ export default function ClaimDetails() {
 
     return (
         <div className="w-full text-white flex justify-center items-start p-2">
-            <Toaster />
+            {/* <Toaster /> */}
             <FullImageModal />
 
             {working && <div>....</div>}

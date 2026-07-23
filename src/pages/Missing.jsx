@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast"
 import SearchableSelect from "../components/SearchableSelect"
 import { useUser } from "../context/UserContext"
 
@@ -75,7 +75,7 @@ export default function Missing() {
     return (
         <div className='w-full flex flex-col gap-6 items-center'>
 
-            <Toaster />
+            {/* <Toaster /> */}
 
             <div className='w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 sm:p-8 space-y-8'>
 

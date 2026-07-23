@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast"
 import SearchableSelect from "../components/SearchableSelect"
 import { useUser } from "../context/UserContext"
 import { FaPlusCircle, FaTrash } from 'react-icons/fa'
@@ -515,7 +515,7 @@ export default function Manage() {
 
         <div className='w-full flex flex-col gap-6 items-center'>
 
-            <Toaster />
+            {/* <Toaster /> */}
 
             {
                 blankGroupData.length > 0 &&

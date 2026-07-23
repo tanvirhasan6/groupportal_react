@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useUser } from "../../context/UserContext";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 const ChangeEmail = () => {
     const user = useUser();
@@ -140,7 +140,7 @@ const ChangeEmail = () => {
 
     return (
         <>
-            <Toaster position="top-center" />
+            {/* <Toaster position="top-center" /> */}
 
             {/* EMAIL INPUT */}
             <div className="w-full flex justify-center items-center gap-2">

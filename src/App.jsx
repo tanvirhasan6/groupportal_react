@@ -1,6 +1,7 @@
 import React, { useState, lazy, Suspense, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { io } from "socket.io-client"
+import { Toaster } from 'react-hot-toast'
 
 import { UserContext } from "./context/UserContext"
 import ClaimDetails from "./pages/ClaimDetails";
@@ -109,6 +110,7 @@ export default function App() {
 
   return (
     <UserContext.Provider value={userInfo}>
+      <Toaster position="top-center" />
       <BrowserRouter>
         <Suspense fallback={<Skeleton />}>
           <Routes>

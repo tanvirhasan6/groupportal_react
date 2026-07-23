@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import DatePickerInput from "../MyDatePicker/DatePickerInput";
 import SearchableSelect from "../SearchableSelect";
 import { useUser } from "../../context/UserContext"
@@ -394,7 +394,7 @@ export default function DeathClaim() {
 
         <div className="w-full">
 
-            <Toaster />
+            {/* <Toaster /> */}
 
             <form onSubmit={handleFormSubmit} className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 sm:p-8 space-y-8">
 

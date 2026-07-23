@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../../context/UserContext";   // <-- update path if needed
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import SearchableSelect from "../SearchableSelect"; // <-- update path
 
 const ChangeBank = () => {
@@ -129,7 +129,7 @@ const ChangeBank = () => {
 
     return (
         <div className="w-full flex flex-col items-center gap-3">
-            <Toaster position="top-center" />
+            {/* <Toaster position="top-center" /> */}
 
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
 
