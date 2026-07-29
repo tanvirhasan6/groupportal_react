@@ -253,7 +253,7 @@ function ForgotPassword({ onBack, onNext }) {
             );
             const data = await res.json();
             console.log(data);
-            
+
             if (data?.status === 200) {
                 const formatted = (data.result || []).map((item) => ({
                     value: item.POLICY_NO,
@@ -284,12 +284,12 @@ function ForgotPassword({ onBack, onNext }) {
             const data = await res.json();
 
             console.log(data);
-            
+
             if (data?.success) {
                 toast.success(data?.message)
                 await new Promise(resolve => setTimeout(resolve, 3000));
                 onNext()
-            }else{
+            } else {
                 toast.error(data?.message)
             }
 
@@ -340,7 +340,7 @@ function ForgotPassword({ onBack, onNext }) {
                 {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
                 <div className="flex justify-between">
-                    <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline">
+                    <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline hover:cursor-pointer">
                         Back
                     </button>
                     <button
@@ -455,7 +455,7 @@ function OTPInput({ onBack, password, userData }) {
                 </div>
 
                 <div className="flex justify-between">
-                    <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline">
+                    <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline hover:cursor-pointer">
                         Back
                     </button>
 
@@ -491,7 +491,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
 
         setLoading(true);
 
-        console.log(userData);
+        // console.log(userData);
 
 
         try {
@@ -505,12 +505,14 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
             });
 
             const data = await res.json();
+            console.log(data);
+            
             if (data?.status === 200) {
                 setPassword(localPassword);
                 onNext();
             }
         } catch (err) {
-            setError("Could not update password. Try again.");
+            setError("OTP sending error. Try again.");
         }
 
         setLoading(false);
@@ -519,7 +521,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
     return (
         <div>
             <form onSubmit={handleSubmit} className="space-y-5">
-                <h2 className="text-2xl font-semibold text-white">Reset password</h2>
+                <h2 className="text-2xl font-semibold text-center mb-6 bg-linear-to-r from-cyan-400 to-fuchsia-400 bg-clip-text text-transparent">Reset password</h2>
 
                 <div className="relative">
                     <label className="text-sm text-slate-300">New password</label>
@@ -565,9 +567,11 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
                     {loading ? "Setting..." : "Set Password"}
                 </button>
 
-                <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline">
-                    Back
-                </button>
+                <div className="flex justify-end items-end">
+                    <button type="button" onClick={onBack} className="text-sm text-gray-400 hover:underline hover:cursor-pointer">
+                        Back
+                    </button>
+                </div>
 
             </form>
         </div>
@@ -617,8 +621,8 @@ function PasswordLogin({ userData, onBack, onLogin }) {
 
             const data = await res.json();
 
-            console.log(data);
-            
+            // console.log(data);
+
             if (data.status === 200) {
 
                 await onLogin();
@@ -643,7 +647,7 @@ function PasswordLogin({ userData, onBack, onLogin }) {
     return (
         <div>
 
-            <p className="text-sm text-gray-400 text-center mb-6">Enter your password to continue.</p>
+            <p className="text-2xl font-semibold text-center mb-6 bg-linear-to-r from-cyan-400 to-fuchsia-400 bg-clip-text text-transparent">Enter your password to continue.</p>
 
             <form
                 onSubmit={handleLogin}
@@ -740,13 +744,16 @@ function PasswordLogin({ userData, onBack, onLogin }) {
                     )}
                 </button>
 
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="w-full py-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition"
-                >
-                    Back
-                </button>
+                <div className="flex justify-end items-end">
+
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="text-sm text-gray-400 hover:underline hover:cursor-pointer"
+                    >
+                        Back
+                    </button>
+                </div>
 
             </form>
 

@@ -94,10 +94,11 @@ export default function DatePickerPopup({
     for (let y = 1950; y <= sysYear; y++) years.push(y);
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
+        // <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
+        <div className="absolute top-full left-0 mt-2 z-50">
             <div
                 ref={ref}
-                className="bg-gray-900/80 border border-cyan-500/40 p-6 rounded-2xl shadow-2xl w-80 h-96 sm:w-96 animate-scale-in"
+                className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-80 sm:w-96 animate-scale-in"
             >
 
                 {/* Header */}

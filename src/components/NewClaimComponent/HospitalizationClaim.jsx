@@ -4,11 +4,12 @@ import DatePickerInput from "../MyDatePicker/DatePickerInput";
 import SearchableSelect from "../SearchableSelect";
 import { useUser } from "../../context/UserContext"
 import { replace, useNavigate } from "react-router-dom";
+import compressImage from "../../utilities/ImageCompressor"
 
 const HospitalizationClaim = () => {
 
     const user = useUser()
-    const navigate =useNavigate()
+    const navigate = useNavigate()
 
     const [prescriptionFiles, setPrescriptionFiles] = useState([]);
     const [testFiles, setTestFiles] = useState([]);
@@ -108,13 +109,48 @@ const HospitalizationClaim = () => {
     };
 
     const FileInput = ({ label, files, setFiles }) => {
-        const handleFileChange = (e) => {
+
+        const handleFileChange = async (e) => {
+
             if (!e.target.files) return;
-            const newFiles = Array.from(e.target.files).filter(
-                (file) => !allSelectedFiles.some((f) => f.name === file.name)
+
+            // const newFiles = Array.from(e.target.files).filter(
+            //     (file) => !allSelectedFiles.some((f) => f.name === file.name)
+            // );
+
+            // setFiles([...files, ...newFiles]);
+
+            const selectedFiles = Array.from(e.target.files).filter(
+                file => !allSelectedFiles.some(f => f.name === file.name)
             );
-            setFiles([...files, ...newFiles]);
+
+            const processedFiles = await Promise.all(
+
+                selectedFiles.map(async file => {
+
+                    if (file.type.startsWith("image/")) {
+
+                        const compressed = await compressImage(file, 500);
+
+                        // console.log(
+                        //     file.name,
+                        //     `${(file.size / 1024).toFixed(0)} KB`,
+                        //     "→",
+                        //     `${(compressed.size / 1024).toFixed(0)} KB`
+                        // );
+
+                        return compressed;
+                    }
+
+                    return file;
+                })
+
+            );
+
+            setFiles(prev => [...prev, ...processedFiles]);
+
             e.target.value = "";
+
         };
 
         const removeFile = (fileName) => {
@@ -318,10 +354,19 @@ const HospitalizationClaim = () => {
 
         try {
             const validate = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/validateClaim?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}&claimType=${formData.claimType}&coverage=${formData.coverage}`,
+                "http://localhost:5001/api/grpclaimportal/claim/validateClaim",
                 {
-                    method: "GET",
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                     credentials: "include",
+                    body: JSON.stringify({
+                        username: user?.USERNAME,
+                        policyno: user?.POLICY_NO,
+                        claimType: formData.claimType,
+                        coverage: formData.coverage,
+                    }),
                 }
             )
 
@@ -340,7 +385,7 @@ const HospitalizationClaim = () => {
                     riskFrom: res.RISK_FROM
                 }))
 
-                if (formData.amount> res.REMAINING_BALANCE) return toast.error(`Exeed the Claim Amount Limit. Your Limit is ${res.REMAINING_BALANCE}`)
+                if (formData.amount > res.REMAINING_BALANCE) return toast.error(`Exeed the Claim Amount Limit. Your Limit is ${res.REMAINING_BALANCE}`)
 
                 const submissionData = new FormData();
 
@@ -352,6 +397,8 @@ const HospitalizationClaim = () => {
                 submissionData.set("ratio", res.BENEFIT_RATIO);
                 submissionData.set("expHead", res.EXP_HEAD);
                 submissionData.set("riskFrom", res.RISK_FROM);
+                submissionData.set("userid", user?.USERNAME);
+                submissionData.set("policyno", user?.POLICY_NO);
 
                 prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file));
                 dischargeFiles.forEach(file => submissionData.append("dischargeFiles", file));
@@ -386,7 +433,7 @@ const HospitalizationClaim = () => {
                             return;
                         }, 1000);
 
-                        
+
                     } catch {
                         console.error("Invalid JSON:", text)
                         setLoading(false)
@@ -452,7 +499,7 @@ const HospitalizationClaim = () => {
                     <div className='col-span-4 w-full flex flex-col sm:flex-row gap-2'>
                         <DatePickerInput
                             name="consultDate"
-                            label="Consult/Treatment Date"
+                            label="Consultation Date"
                             value={formData.consultDate}
                             onChange={(val) => setFormData(prev => ({ ...prev, consultDate: val }))}
                             maxDate={new Date()}
@@ -503,11 +550,12 @@ const HospitalizationClaim = () => {
                             value={formData.disease}
                             onChange={
                                 (val) => {
+
                                     const selected = diseasesData.find(d => d.value === val)
                                     setFormData(prev => ({
                                         ...prev,
                                         disease: val,                 // CODE
-                                        diseaseName: selected?.label // DESCRIPTION
+                                        diseaseName: val === 1 ? '' : selected?.label // DESCRIPTION
                                     }))
                                 }
                             }
@@ -515,6 +563,18 @@ const HospitalizationClaim = () => {
                             disabled={false}
                             onFocus={(e) => e.target.select()}
                         />
+
+                        {formData.disease === 1 && (
+                            <input
+                                type="text"
+                                name="diseaseName"
+                                value={formData.diseaseName}
+                                onChange={handleChange}
+                                placeholder="Enter Other Disease"
+                                className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                            />
+                        )}
+
                     </div>
 
                     <div className='col-span-4 md:col-span-5'>
@@ -528,7 +588,7 @@ const HospitalizationClaim = () => {
                                     setFormData(prev => ({
                                         ...prev,
                                         hospital: val,                 // CODE
-                                        hospitalName: selected?.label // DESCRIPTION
+                                        hospitalName: val === 1 ? '' : selected?.label // DESCRIPTION
                                     }))
                                 }
                             }
@@ -536,6 +596,18 @@ const HospitalizationClaim = () => {
                             disabled={false}
                             onFocus={(e) => e.target.select()}
                         />
+
+                        {formData.hospital === 1 && (
+                            <input
+                                type="text"
+                                name="hospitalName"
+                                value={formData.hospitalName}
+                                onChange={handleChange}
+                                placeholder="Enter Other Hospital Name"
+                                className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                            />
+                        )}
+
                     </div>
 
                 </div>

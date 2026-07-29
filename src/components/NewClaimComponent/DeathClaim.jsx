@@ -4,6 +4,7 @@ import DatePickerInput from "../MyDatePicker/DatePickerInput";
 import SearchableSelect from "../SearchableSelect";
 import { useUser } from "../../context/UserContext"
 import { useNavigate } from "react-router-dom"
+import compressImage from "../../utilities/ImageCompressor"
 
 export default function DeathClaim() {
 
@@ -121,12 +122,35 @@ export default function DeathClaim() {
     }
 
     const FileInput = ({ label, files, setFiles }) => {
-        const handleFileChange = (e) => {
+        const handleFileChange = async(e) => {
+
             if (!e.target.files) return;
-            const newFiles = Array.from(e.target.files).filter(
-                (file) => !allSelectedFiles.some((f) => f.name === file.name)
+
+            // const newFiles = Array.from(e.target.files).filter(
+            //     (file) => !allSelectedFiles.some((f) => f.name === file.name)
+            // );
+            // setFiles([...files, ...newFiles]);
+
+            const selectedFiles = Array.from(e.target.files).filter(
+                file => !allSelectedFiles.some(f => f.name === file.name)
             );
-            setFiles([...files, ...newFiles]);
+
+            const processedFiles = await Promise.all(
+
+                selectedFiles.map(async file => {
+
+                    if (file.type.startsWith("image/")) {
+                        const compressed = await compressImage(file, 500);
+                        return compressed;
+                    }
+
+                    return file;
+                })
+
+            );
+
+            setFiles(prev => [...prev, ...processedFiles]);
+
             e.target.value = "";
         };
 
@@ -294,13 +318,23 @@ export default function DeathClaim() {
         e.preventDefault()
 
         try {
+
             const validate = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/validateClaim?userid=${beneficiary}&policyno=${user?.POLICY_NO}&claimType=${formData.claimType}&coverage=${formData.coverage}`,
+                "http://localhost:5001/api/grpclaimportal/claim/validateClaim",
                 {
-                    method: "GET",
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                     credentials: "include",
+                    body: JSON.stringify({
+                        username: user?.USERNAME,
+                        policyno: user?.POLICY_NO,
+                        claimType: formData.claimType,
+                        coverage: formData.coverage,
+                    }),
                 }
-            )
+            )            
 
             const data = await validate.json()
 
@@ -317,7 +351,7 @@ export default function DeathClaim() {
                     riskFrom: res.RISK_FROM
                 }))
 
-                if (formData.amount> res.REMAINING_BALANCE) return toast.error(`Exeed the Claim Amount Limit. Your Limit is ${res.REMAINING_BALANCE}`)
+                if (formData.amount > res.REMAINING_BALANCE) return toast.error(`Exeed the Claim Amount Limit. Your Limit is ${res.REMAINING_BALANCE}`)
 
                 const submissionData = new FormData();
 
@@ -329,6 +363,8 @@ export default function DeathClaim() {
                 submissionData.set("ratio", res.BENEFIT_RATIO)
                 submissionData.set("expHead", res.EXP_HEAD)
                 submissionData.set("riskFrom", res.RISK_FROM)
+                submissionData.set("userid", user?.USERNAME);
+                submissionData.set("policyno", user?.POLICY_NO);
 
                 prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file))
                 testFiles.forEach(file => submissionData.append("testFiles", file))
@@ -367,7 +403,7 @@ export default function DeathClaim() {
                             return;
                         }, 1000);
 
-                        
+
                     } catch {
                         console.error("Invalid JSON:", text)
                         setLoading(false)
@@ -506,7 +542,7 @@ export default function DeathClaim() {
                                             setFormData(prev => ({
                                                 ...prev,
                                                 death: val,                 // CODE
-                                                deathName: selected?.label // DESCRIPTION
+                                                deathName: val === 1 ? '' : selected?.label // DESCRIPTION
                                             }))
                                         }
                                     }
@@ -514,6 +550,18 @@ export default function DeathClaim() {
                                     disabled={!formData.coverage}
                                     onFocus={(e) => e.target.select()}
                                 />
+
+                                {formData.death === 1 && (
+                                    <input
+                                        type="text"
+                                        name="deathName"
+                                        value={formData.deathName}
+                                        onChange={handleChange}
+                                        placeholder="Enter Other Disease"
+                                        className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                                    />
+                                )}
+
                             </div>
 
                             <div className='col-span-4'>
@@ -527,7 +575,7 @@ export default function DeathClaim() {
                                             setFormData(prev => ({
                                                 ...prev,
                                                 deathPlace: val,                 // CODE
-                                                deathPlaceName: selected?.label // DESCRIPTION
+                                                deathPlaceName: val === 1 ? '' : selected?.label // DESCRIPTION
                                             }))
                                         }
                                     }
@@ -535,6 +583,18 @@ export default function DeathClaim() {
                                     disabled={!formData.coverage}
                                     onFocus={(e) => e.target.select()}
                                 />
+
+                                {formData.deathPlace === 1 && (
+                                    <input
+                                        type="text"
+                                        name="deathPlaceName"
+                                        value={formData.deathPlaceName}
+                                        onChange={handleChange}
+                                        placeholder="Enter Other Disease"
+                                        className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                                    />
+                                )}
+
                             </div>
 
                             <DatePickerInput

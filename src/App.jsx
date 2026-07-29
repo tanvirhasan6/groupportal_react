@@ -31,33 +31,6 @@ export default function App() {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // const refreshUser = async () => {
-  //   try {
-  //     const res = await fetch(
-  //       "http://localhost:5001/api/grpclaimportal/current-user",
-  //       {
-  //         credentials: "include",
-  //       }
-  //     );
-
-  //     const data = await res.json();
-
-  //     if (data.status === 200) {
-  //       setUserInfo(data.result);
-  //     } else {
-  //       setUserInfo(null);
-  //     }
-  //   } catch (error) {
-  //     console.error("User Validating failed:", error)
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   refreshUser();
-  // }, []);
-
   const authChecking = useRef(false);
   const logoutHandled = useRef(false);
   const intervalRef = useRef(null);
@@ -108,7 +81,7 @@ export default function App() {
         await Swal.fire({
           icon: "warning",
           title: "Session Ended",
-          text: "Your account has been signed in from another device. For your security, you have been logged out.",
+          text: "Your account has been logged out as your session time is over.",
           confirmButtonText: "OK",
           allowOutsideClick: false,
           allowEscapeKey: false,
@@ -122,68 +95,57 @@ export default function App() {
   }
 
   useEffect(() => {
-    checkAuth();
-    intervalRef.current = setInterval(() => {
-      checkAuth();
-    }, 10000);
-
-    return () => clearInterval(intervalRef.current);
+    checkAuth();   
   }, []);
 
+  useEffect(() => {
+    if (!userInfo) {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        return;
+    }
 
-  // ----------------------------------------------------
-  // SINGLE TAB SOCKET PROTECTION
-  // ----------------------------------------------------
-  const socketRef = useRef(null);
+    intervalRef.current = setInterval(() => {
+        checkAuth();
+    }, 10000);
 
-  // useEffect(() => {
-  //   if (!userInfo?.USERNAME) return;
+    return () => {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+    };
+}, [userInfo]);
 
-  //   // Don't create another socket if one already exists
-  //   if (socketRef.current) return;
+  const stopPolling = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
 
-  //   socketRef.current = io("http://localhost:5001", {
-  //     query: {
-  //       userId: userInfo.USERNAME,
-  //       clientApp: "claimPortal",
-  //     },
-  //     transports: ["websocket"],
-  //     reconnection: false,
-  //   });
-
-  //   socketRef.current.on("multiple_tabs_not_allowed", () => {
-  //     toast.error("Another tab is already open.");
-
-  //     socketRef.current.disconnect();
-  //     socketRef.current = null;
-
-  //     // If you have a logout API, call it here
-
-  //     window.location.replace("/login");
-  //   });
-
-  //   return () => {
-  //     socketRef.current?.disconnect();
-  //     socketRef.current = null;
-  //   };
-  // }, [userInfo?.USERNAME]);
 
   const handleLogout = async () => {
+    setLoading(true)
     try {
       const res = await fetch("http://localhost:5001/api/grpclaimportal/logout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userid: userInfo.USERNAME }),
+        body: JSON.stringify({ userid: userInfo.USERNAME, policyno: userInfo.POLICY_NO }),
         credentials: "include",
       })
 
       const data = await res.json()
 
       if (data?.status === 200) {
+        stopPolling()
         setUserInfo(null)
+        authChecking.current = false;
       }
     } catch (error) {
       console.error("Logout failed:", error)
+    } finally {
+      setLoading(false)
     }
   }
 

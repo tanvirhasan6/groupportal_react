@@ -12,7 +12,7 @@ export default function DatePickerInput({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
       {label && <label className="block text-sm mb-1 text-gray-300">{label}</label>}
 
       <input
