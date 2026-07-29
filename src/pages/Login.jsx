@@ -116,7 +116,7 @@ function LogIn({ onForgot, onPassword, onSuccess, }) {
 
             const data = await res.json();
 
-            console.log(data);
+            // console.log(data);
 
 
             if (data?.status === 201) {
@@ -252,6 +252,8 @@ function ForgotPassword({ onBack, onNext }) {
                 }
             );
             const data = await res.json();
+            console.log(data);
+            
             if (data?.status === 200) {
                 const formatted = (data.result || []).map((item) => ({
                     value: item.POLICY_NO,
@@ -615,6 +617,8 @@ function PasswordLogin({ userData, onBack, onLogin }) {
 
             const data = await res.json();
 
+            console.log(data);
+            
             if (data.status === 200) {
 
                 await onLogin();

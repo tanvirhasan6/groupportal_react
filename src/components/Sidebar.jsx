@@ -42,6 +42,10 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         "FAQ": <FaQuestion />,
     };
 
+    const handleLinkClick = () => {
+        setSidebarOpen(false);
+    };
+
     return (
         <aside
             className={`absolute left-0 top-0 h-full w-64
@@ -52,7 +56,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 text-sm">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 mt-10">
                     <img
                         src={`http://localhost/admin/img/${user?.POLICY_NO}.png`}
                         alt="User Logo"
@@ -72,6 +76,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <Link
                     className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex flex-row gap-2 items-center"
                     to="/dashboard"
+                    onClick={handleLinkClick}
                 >
                     <FaHome /> Home
                 </Link>
@@ -81,6 +86,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         key={index}
                         className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex flex-row gap-2 items-center"
                         to={`/dashboard/${menu.toLowerCase().replace(/\s+/g, "")}`}
+                        onClick={handleLinkClick}
                     >
                         {iconMap[menu] || <FaFileAlt />} {menu}
                     </Link>

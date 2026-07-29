@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 export default function BeneficiaryClaimSummary({ percent }) {
 
     const user = useUser()
-    console.log(user);
+    // console.log(user);
     
     const [claimUsageData, setClaimUsageData] = useState([])
 
@@ -41,12 +41,12 @@ export default function BeneficiaryClaimSummary({ percent }) {
     return (
         <div className="w-full">
 
-            <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
 
                 {claimUsageData?.map((item) => (
 
                     <CircleProgress
-                        className=' bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-lg'
+                        className=' bg-gray-800 border border-gray-700 rounded-2xl p-4 shadow-lg'
                         key={item.BENEFIT_CODE}
                         title={item.BENEFIT_HEAD}
                         limit={item.PER_SUMINSURED}

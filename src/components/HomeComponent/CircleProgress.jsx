@@ -58,12 +58,31 @@ export default function CircleProgress({
     return (
         <div className={`flex flex-col items-center text-center ${className}`} role="group" aria-label={ariaLabel}>
             {title && (
-                <div className="w-full mb-2 text-xs text-slate-500 px-2">
-                    <div className="w-full">{title}</div>
+                <div className="w-full mb-2 text-xs text-slate-500">
+                    <div className="w-full text-left">{title}</div>
                 </div>
             )}
 
-            <div
+            <div className="mt-3 w-full text-xs sm:text-sm">
+                <div className="w-full flex justify-between items-center text-slate-400 flex-col gap-1">
+                    <div className="w-full flex flex-row justify-between items-center">
+                        <span className="text-[11px] sm:text-xs text-slate-400 text-start">Limit</span>
+                        <span className="font-medium text-slate-300 text-end">{limit}</span>
+                    </div>
+
+                    <div className="w-full flex flex-row justify-between items-center">
+                        <span className="text-[11px] sm:text-xs text-indigo-400 text-start">Used</span>
+                        <span className="font-medium text-indigo-300 text-end">{used}</span>
+                    </div>
+
+                    <div className="w-full flex flex-row justify-between items-center">
+                        <span className="text-[11px] sm:text-xs text-cyan-600 text-start">Balance</span>
+                        <span className="font-medium text-cyan-400 text-end">{balance}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* <div
                 className="w-full relative"
                 style={{ width: `${dimension}px`, height: `${dimension}px` }}
             >
@@ -79,7 +98,6 @@ export default function CircleProgress({
                         </linearGradient>
                     </defs>
 
-                    {/* background */}
                     <circle
                         cx={60}
                         cy={60}
@@ -90,7 +108,6 @@ export default function CircleProgress({
                         className="opacity-50"
                     />
 
-                    {/* animated progress */}
                     <circle
                         cx={60}
                         cy={60}
@@ -109,7 +126,7 @@ export default function CircleProgress({
                     />
                 </svg>
 
-                {/* center number */}
+                
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <div className="text-lg font-semibold leading-none">
                         <span className="text-xl sm:text-2xl md:text-3xl">
@@ -118,27 +135,11 @@ export default function CircleProgress({
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
-            {/* stats row */}
-            <div className="mt-3 w-full text-xs sm:text-sm">
-                <div className="flex justify-between items-center text-slate-400 px-2">
-                    <div className="flex flex-col items-start">
-                        <span className="text-[11px] sm:text-xs text-slate-400">Limit</span>
-                        <span className="font-medium text-slate-300">{limit}</span>
-                    </div>
+            {/* stats row */}            
+            
 
-                    <div className="flex flex-col items-center">
-                        <span className="text-[11px] sm:text-xs text-indigo-400">Used</span>
-                        <span className="font-medium text-indigo-300">{used}</span>
-                    </div>
-
-                    <div className="flex flex-col items-end">
-                        <span className="text-[11px] sm:text-xs text-cyan-600">Balance</span>
-                        <span className="font-medium text-cyan-400">{balance}</span>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

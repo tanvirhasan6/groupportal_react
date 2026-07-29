@@ -309,7 +309,7 @@ export default function ClaimDetails() {
             {/* <Toaster /> */}
             <FullImageModal />
 
-            {working && <div>....</div>}
+            {working && <div>Please Wait ... </div>}
 
 
             {!working &&
