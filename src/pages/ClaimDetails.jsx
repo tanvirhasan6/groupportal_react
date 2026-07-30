@@ -2,6 +2,111 @@ import React, { useEffect, useState } from 'react'
 import { useUser } from "../context/UserContext"
 import { useLocation, useNavigate } from 'react-router-dom'
 import toast from "react-hot-toast"
+import compressImage from '../utilities/ImageCompressor';
+
+function FileInput({
+    label,
+    files = [],
+    setFiles,
+    existingFiles = [],
+}) {
+
+    const handleFileChange = async (e) => {
+        if (!e.target.files) return;
+
+        const selectedFiles = Array.from(e.target.files);
+
+        try {
+
+            toast.loading("Compressing images...", { id: "compress" });
+
+            const compressedFiles = await Promise.all(
+                selectedFiles.map(file => compressImage(file, 500))
+            );
+
+            toast.dismiss("compress");
+
+            const filtered = compressedFiles.filter(file => {
+                const name = file.name.trim();
+
+                if (existingFiles.includes(name)) {
+                    toast.error(`"${name}" is already uploaded earlier.`);
+                    return false;
+                }
+
+                if (
+                    files.some(
+                        f =>
+                            f.name === file.name &&
+                            f.size === file.size &&
+                            f.lastModified === file.lastModified
+                    )
+                ) {
+                    toast.error(`"${name}" is already selected.`);
+                    return false;
+                }
+
+                return true;
+            });
+
+            setFiles(prev => [...prev, ...filtered]);
+
+        } catch (err) {
+            toast.error("Image compression failed.");
+            console.error(err);
+        } finally {
+            e.target.value = "";
+        }
+    };
+
+    const removeFile = (index) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+            <label className="block text-sm mb-2 text-gray-300">
+                {label}
+            </label>
+
+            <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="file:bg-cyan-600
+                           file:hover:bg-cyan-700
+                           file:border-0
+                           file:rounded-md
+                           file:px-4
+                           file:py-1
+                           file:text-white
+                           text-gray-400
+                           text-sm"
+            />
+
+            <ul className="mt-3 space-y-2">
+                {files.map((file, index) => (
+                    <li
+                        key={`${file.name}-${file.lastModified}-${index}`}
+                        className="flex justify-between items-center bg-gray-800 p-2 rounded"
+                    >
+                        <span className="truncate mr-2">
+                            {file.name}
+                        </span>
+
+                        <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="text-red-500 hover:text-red-700 font-bold text-lg"
+                        >
+                            ✕
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
 
 export default function ClaimDetails() {
 
@@ -130,77 +235,74 @@ export default function ClaimDetails() {
         }
     };
 
-    const FileInput = ({ label, files, setFiles }) => {
+    // const FileInput = ({ label, files, setFiles }) => {
 
-        const existingFiles = documentData?.map(doc => doc.ORIGINAL_FILENAME?.trim()) || []
+    //     const existingFiles = documentData?.map(doc => doc.ORIGINAL_FILENAME?.trim()) || []
 
-        const handleFileChange = (e) => {
+    //     const handleFileChange = (e) => {
 
-            if (!e.target.files) return;
+    //         if (!e.target.files) return;
 
-            const selectedFiles = Array.from(e.target.files);
+    //         const selectedFiles = Array.from(e.target.files);
 
-            const filtered = selectedFiles.filter((file) => {
+    //         const filtered = selectedFiles.filter((file) => {
 
-                // console.log(existingFiles);
+    //             const name = file.name.trim();
 
+    //             // Check 1: Already uploaded before?
+    //             if (existingFiles.includes(name)) {
+    //                 toast.error(`"${name}" is already uploaded earlier.`);
+    //                 return false;
+    //             }
 
-                const name = file.name.trim();
+    //             // Check 2: Already selected now?
+    //             if (files.some((f) => f.name.trim() === name)) {
+    //                 toast.error(`"${name}" is already selected.`);
+    //                 return false;
+    //             }
 
-                // Check 1: Already uploaded before?
-                if (existingFiles.includes(name)) {
-                    toast.error(`"${name}" is already uploaded earlier.`);
-                    return false;
-                }
+    //             return true;
+    //         });
 
-                // Check 2: Already selected now?
-                if (files.some((f) => f.name.trim() === name)) {
-                    toast.error(`"${name}" is already selected.`);
-                    return false;
-                }
+    //         setFiles([...files, ...filtered]);
+    //         e.target.value = "";
+    //     };
 
-                return true;
-            });
+    //     const removeFile = (fileName) => {
+    //         setFiles(files.filter((f) => f.name !== fileName));
+    //     };
 
-            setFiles([...files, ...filtered]);
-            e.target.value = "";
-        };
+    //     return (
+    //         <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+    //             <label className="block text-sm mb-2 text-gray-300">{label}</label>
 
-        const removeFile = (fileName) => {
-            setFiles(files.filter((f) => f.name !== fileName));
-        };
+    //             <input
+    //                 type="file"
+    //                 multiple
+    //                 onChange={handleFileChange}
+    //                 className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
+    //             />
 
-        return (
-            <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
-                <label className="block text-sm mb-2 text-gray-300">{label}</label>
-
-                <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
-                />
-
-                <ul className="mt-2">
-                    {files.map((file) => (
-                        <li
-                            key={file.name}
-                            className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
-                        >
-                            <span>{file.name}</span>
-                            <button
-                                type="button"
-                                onClick={() => removeFile(file.name)}
-                                className="text-red-500 hover:text-red-700 font-bold"
-                            >
-                                ✕
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    }
+    //             <ul className="mt-2">
+    //                 {files.map((file) => (
+    //                     <li
+    //                         key={file.name}
+    //                         className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
+    //                     >
+    //                         <span>{file.name}</span>
+    //                         <button
+    //                             type="button"
+    //                             onClick={() => removeFile(file.name)}
+    //                             className="text-red-500 hover:text-red-700 font-bold"
+    //                         >
+    //                             ✕
+    //                         </button>
+    //                     </li>
+    //                 ))}
+    //             </ul>
+    //         </div>
+    //     );
+    // }
 
     const allSelectedFiles = [
         ...prescriptionFiles,
@@ -337,12 +439,12 @@ export default function ClaimDetails() {
 
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {basicData.BENEFIT_CODE === '102' && (
-                                            <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} />
+                                            <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} existingFiles={documentData} />
                                         )}
-                                        <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
-                                        <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
-                                        <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
-                                        <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                                        <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} existingFiles={documentData} />
+                                        <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} existingFiles={documentData} />
+                                        <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} existingFiles={documentData} />
+                                        <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} existingFiles={documentData} />
                                     </div>
 
                                     <div className="flex justify-center mt-5">

@@ -6,6 +6,81 @@ import { useUser } from "../../context/UserContext"
 import { useNavigate } from "react-router-dom"
 import compressImage from "../../utilities/ImageCompressor"
 
+function FileInput({
+    label,
+    files = [],
+    setFiles,
+}) {
+
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+
+        // Prevent duplicate files
+        const newFiles = selectedFiles.filter(
+            file =>
+                !files.some(
+                    f =>
+                        f.name === file.name &&
+                        f.size === file.size &&
+                        f.lastModified === file.lastModified
+                )
+        );
+
+        setFiles(prev => [...prev, ...newFiles]);
+
+        // Allow selecting the same file again after removing it
+        e.target.value = "";
+    };
+
+    const removeFile = (index) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+            <label className="block text-sm mb-2 text-gray-300">
+                {label}
+            </label>
+
+            <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="file:bg-cyan-600
+                           file:hover:bg-cyan-700
+                           file:border-0
+                           file:rounded-md
+                           file:px-4
+                           file:py-1
+                           file:text-white
+                           text-gray-400
+                           text-sm"
+            />
+
+            <ul className="mt-3 space-y-2">
+                {files.map((file, index) => (
+                    <li
+                        key={`${file.name}-${file.lastModified}-${index}`}
+                        className="flex justify-between items-center bg-gray-800 p-2 rounded"
+                    >
+                        <span className="truncate mr-2">
+                            {file.name}
+                        </span>
+
+                        <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="text-red-500 hover:text-red-700 font-bold text-lg"
+                        >
+                            ✕
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 export default function DeathClaim() {
 
     const user = useUser()
@@ -121,74 +196,74 @@ export default function DeathClaim() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    const FileInput = ({ label, files, setFiles }) => {
-        const handleFileChange = async(e) => {
+    // const FileInput = ({ label, files, setFiles }) => {
+    //     const handleFileChange = async(e) => {
 
-            if (!e.target.files) return;
+    //         if (!e.target.files) return;
 
-            // const newFiles = Array.from(e.target.files).filter(
-            //     (file) => !allSelectedFiles.some((f) => f.name === file.name)
-            // );
-            // setFiles([...files, ...newFiles]);
+    //         const newFiles = Array.from(e.target.files).filter(
+    //             (file) => !allSelectedFiles.some((f) => f.name === file.name)
+    //         );
+    //         setFiles([...files, ...newFiles]);
 
-            const selectedFiles = Array.from(e.target.files).filter(
-                file => !allSelectedFiles.some(f => f.name === file.name)
-            );
+    //         // const selectedFiles = Array.from(e.target.files).filter(
+    //         //     file => !allSelectedFiles.some(f => f.name === file.name)
+    //         // );
 
-            const processedFiles = await Promise.all(
+    //         // const processedFiles = await Promise.all(
 
-                selectedFiles.map(async file => {
+    //         //     selectedFiles.map(async file => {
 
-                    if (file.type.startsWith("image/")) {
-                        const compressed = await compressImage(file, 500);
-                        return compressed;
-                    }
+    //         //         if (file.type.startsWith("image/")) {
+    //         //             const compressed = await compressImage(file, 500);
+    //         //             return compressed;
+    //         //         }
 
-                    return file;
-                })
+    //         //         return file;
+    //         //     })
 
-            );
+    //         // );
 
-            setFiles(prev => [...prev, ...processedFiles]);
+    //         // setFiles(prev => [...prev, ...processedFiles]);
 
-            e.target.value = "";
-        };
+    //         e.target.value = "";
+    //     };
 
-        const removeFile = (fileName) => {
-            setFiles(files.filter((f) => f.name !== fileName));
-        };
+    //     const removeFile = (fileName) => {
+    //         setFiles(files.filter((f) => f.name !== fileName));
+    //     };
 
-        return (
-            <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
-                <label className="block text-sm mb-2 text-gray-300">{label}</label>
+    //     return (
+    //         <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+    //             <label className="block text-sm mb-2 text-gray-300">{label}</label>
 
-                <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
-                />
+    //             <input
+    //                 type="file"
+    //                 multiple
+    //                 onChange={handleFileChange}
+    //                 className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
+    //             />
 
-                <ul className="mt-2">
-                    {files.map((file) => (
-                        <li
-                            key={file.name}
-                            className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
-                        >
-                            <span>{file.name}</span>
-                            <button
-                                type="button"
-                                onClick={() => removeFile(file.name)}
-                                className="text-red-500 hover:text-red-700 font-bold"
-                            >
-                                ✕
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    }
+    //             <ul className="mt-2">
+    //                 {files.map((file) => (
+    //                     <li
+    //                         key={file.name}
+    //                         className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
+    //                     >
+    //                         <span>{file.name}</span>
+    //                         <button
+    //                             type="button"
+    //                             onClick={() => removeFile(file.name)}
+    //                             className="text-red-500 hover:text-red-700 font-bold"
+    //                         >
+    //                             ✕
+    //                         </button>
+    //                     </li>
+    //                 ))}
+    //             </ul>
+    //         </div>
+    //     );
+    // }
 
     const getBeneficiaryData = async (i) => {
 
@@ -363,7 +438,7 @@ export default function DeathClaim() {
                 submissionData.set("ratio", res.BENEFIT_RATIO)
                 submissionData.set("expHead", res.EXP_HEAD)
                 submissionData.set("riskFrom", res.RISK_FROM)
-                submissionData.set("userid", user?.USERNAME);
+                submissionData.set("username", user?.USERNAME);
                 submissionData.set("policyno", user?.POLICY_NO);
 
                 prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file))

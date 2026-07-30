@@ -14,6 +14,8 @@ const compressImage = async (file, maxSizeKB = 500) => {
 
         const img = new Image();
 
+        const objectUrl = URL.createObjectURL(file);
+
         img.onload = () => {
 
             let width = img.width;
@@ -26,7 +28,7 @@ const compressImage = async (file, maxSizeKB = 500) => {
 
             const mimeType =
                 file.type === "image/png"
-                    ? "image/jpeg" // PNG compresses poorly; convert to JPEG
+                    ? "image/jpeg"
                     : file.type;
 
             const compress = () => {
@@ -41,56 +43,55 @@ const compressImage = async (file, maxSizeKB = 500) => {
                     (blob) => {
 
                         if (!blob) {
+                            URL.revokeObjectURL(objectUrl);   // <-- Release memory
                             reject(new Error("Image compression failed."));
                             return;
                         }
 
-                        // Success
                         if (blob.size <= maxSizeKB * 1024) {
 
-                            const compressedFile = new File(
-                                [blob],
-                                file.name.replace(/\.\w+$/, ".jpg"),
-                                {
-                                    type: mimeType,
-                                    lastModified: Date.now(),
-                                }
+                            URL.revokeObjectURL(objectUrl);   // <-- Release memory
+
+                            resolve(
+                                new File(
+                                    [blob],
+                                    file.name.replace(/\.\w+$/, ".jpg"),
+                                    {
+                                        type: mimeType,
+                                        lastModified: Date.now(),
+                                    }
+                                )
                             );
 
-                            resolve(compressedFile);
                             return;
                         }
 
-                        // Reduce quality first
                         if (quality > 0.3) {
                             quality -= 0.1;
                             compress();
                             return;
                         }
 
-                        // Then reduce dimensions
                         if (width > 800 || height > 800) {
-
                             width = Math.floor(width * 0.9);
                             height = Math.floor(height * 0.9);
-
                             quality = 0.9;
-
                             compress();
                             return;
                         }
 
-                        // Couldn't reach target
-                        const compressedFile = new File(
-                            [blob],
-                            file.name.replace(/\.\w+$/, ".jpg"),
-                            {
-                                type: mimeType,
-                                lastModified: Date.now(),
-                            }
-                        );
+                        URL.revokeObjectURL(objectUrl);   // <-- Release memory
 
-                        resolve(compressedFile);
+                        resolve(
+                            new File(
+                                [blob],
+                                file.name.replace(/\.\w+$/, ".jpg"),
+                                {
+                                    type: mimeType,
+                                    lastModified: Date.now(),
+                                }
+                            )
+                        );
 
                     },
                     mimeType,
@@ -101,8 +102,12 @@ const compressImage = async (file, maxSizeKB = 500) => {
             compress();
         };
 
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
+        img.onerror = (err) => {
+            URL.revokeObjectURL(objectUrl);   // <-- Release memory
+            reject(err);
+        };
+
+        img.src = objectUrl;
     });
 }
 

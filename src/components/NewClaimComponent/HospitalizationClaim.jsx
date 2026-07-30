@@ -6,6 +6,96 @@ import { useUser } from "../../context/UserContext"
 import { replace, useNavigate } from "react-router-dom";
 import compressImage from "../../utilities/ImageCompressor"
 
+function FileInput({
+    label,
+    files = [],
+    setFiles,
+}) {
+
+    const handleFileChange = async(e) => {
+        const selectedFiles = Array.from(e.target.files);
+
+        try {
+
+            toast.loading("Compressing images...", { id: "compress" });
+
+            const compressedFiles = await Promise.all(
+                selectedFiles.map(file => compressImage(file, 500))
+            );
+
+            console.log(compressedFiles);
+
+            toast.dismiss("compress");
+            // Prevent duplicate files
+            const newFiles = compressedFiles.filter(
+                file =>
+                    !files.some(
+                        f =>
+                            f.name === file.name &&
+                            f.size === file.size &&
+                            f.lastModified === file.lastModified
+                    )
+            );
+
+            setFiles(prev => [...prev, ...newFiles]);
+
+        } catch (err) {
+            toast.error("Image compression failed.");
+            console.error(err);
+        } finally {
+            e.target.value = "";
+        }
+    };
+
+    const removeFile = (index) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+            <label className="block text-sm mb-2 text-gray-300">
+                {label}
+            </label>
+
+            <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="file:bg-cyan-600
+                           file:hover:bg-cyan-700
+                           file:border-0
+                           file:rounded-md
+                           file:px-4
+                           file:py-1
+                           file:text-white
+                           text-gray-400
+                           text-sm"
+            />
+
+            <ul className="mt-3 space-y-2">
+                {files.map((file, index) => (
+                    <li
+                        key={`${file.name}-${file.lastModified}-${index}`}
+                        className="flex justify-between items-center bg-gray-800 p-2 rounded"
+                    >
+                        <span className="truncate mr-2">
+                            {file.name}
+                        </span>
+
+                        <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="text-red-500 hover:text-red-700 font-bold text-lg"
+                        >
+                            ✕
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 const HospitalizationClaim = () => {
 
     const user = useUser()
@@ -108,86 +198,59 @@ const HospitalizationClaim = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const FileInput = ({ label, files, setFiles }) => {
+    // const FileInput = ({ label, files, setFiles }) => {
 
-        const handleFileChange = async (e) => {
+    //     const handleFileChange = async (e) => {
 
-            if (!e.target.files) return;
+    //         console.log("File selected");
+    //         console.log(e.target.files);
 
-            // const newFiles = Array.from(e.target.files).filter(
-            //     (file) => !allSelectedFiles.some((f) => f.name === file.name)
-            // );
 
-            // setFiles([...files, ...newFiles]);
+    //         const newFiles = Array.from(e.target.files).filter(
+    //             (file) => !allSelectedFiles.some((f) => f.name === file.name)
+    //         );
 
-            const selectedFiles = Array.from(e.target.files).filter(
-                file => !allSelectedFiles.some(f => f.name === file.name)
-            );
+    //         setFiles(prev => [...prev, ...newFiles]);
 
-            const processedFiles = await Promise.all(
+    //         e.target.value = "";
 
-                selectedFiles.map(async file => {
+    //     };
 
-                    if (file.type.startsWith("image/")) {
+    //     const removeFile = (fileName) => {
+    //         setFiles(files.filter((f) => f.name !== fileName));
+    //     };
 
-                        const compressed = await compressImage(file, 500);
+    //     return (
+    //         <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+    //             <label className="block text-sm mb-2 text-gray-300">{label}</label>
 
-                        // console.log(
-                        //     file.name,
-                        //     `${(file.size / 1024).toFixed(0)} KB`,
-                        //     "→",
-                        //     `${(compressed.size / 1024).toFixed(0)} KB`
-                        // );
+    //             <input
+    //                 type="file"
+    //                 multiple
+    //                 onChange={handleFileChange}
+    //                 className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
+    //             />
 
-                        return compressed;
-                    }
-
-                    return file;
-                })
-
-            );
-
-            setFiles(prev => [...prev, ...processedFiles]);
-
-            e.target.value = "";
-
-        };
-
-        const removeFile = (fileName) => {
-            setFiles(files.filter((f) => f.name !== fileName));
-        };
-
-        return (
-            <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
-                <label className="block text-sm mb-2 text-gray-300">{label}</label>
-
-                <input
-                    type="file"
-                    multiple
-                    onChange={handleFileChange}
-                    className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
-                />
-
-                <ul className="mt-2">
-                    {files.map((file) => (
-                        <li
-                            key={file.name}
-                            className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
-                        >
-                            <span>{file.name}</span>
-                            <button
-                                type="button"
-                                onClick={() => removeFile(file.name)}
-                                className="text-red-500 hover:text-red-700 font-bold"
-                            >
-                                ✕
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        );
-    };
+    //             <ul className="mt-2">
+    //                 {files.map((file) => (
+    //                     <li
+    //                         key={file.name}
+    //                         className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
+    //                     >
+    //                         <span>{file.name}</span>
+    //                         <button
+    //                             type="button"
+    //                             onClick={() => removeFile(file.name)}
+    //                             className="text-red-500 hover:text-red-700 font-bold"
+    //                         >
+    //                             ✕
+    //                         </button>
+    //                     </li>
+    //                 ))}
+    //             </ul>
+    //         </div>
+    //     );
+    // };
 
     const getSlotData = async () => {
         setSlotData([]);
@@ -353,6 +416,7 @@ const HospitalizationClaim = () => {
         }
 
         try {
+
             const validate = await fetch(
                 "http://localhost:5001/api/grpclaimportal/claim/validateClaim",
                 {
@@ -397,7 +461,7 @@ const HospitalizationClaim = () => {
                 submissionData.set("ratio", res.BENEFIT_RATIO);
                 submissionData.set("expHead", res.EXP_HEAD);
                 submissionData.set("riskFrom", res.RISK_FROM);
-                submissionData.set("userid", user?.USERNAME);
+                submissionData.set("username", user?.USERNAME);
                 submissionData.set("policyno", user?.POLICY_NO);
 
                 prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file));
@@ -614,12 +678,12 @@ const HospitalizationClaim = () => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {formData.claimType === '102' && (
-                        <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} />
+                        <FileInput key="discharge" label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} />
                     )}
-                    <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
-                    <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
-                    <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
-                    <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                    <FileInput key="prescription" label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
+                    <FileInput key="medical" label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
+                    <FileInput key="moneyreceipt" label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
+                    <FileInput key="others" label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
                 </div>
 
                 <div className="flex justify-center">
