@@ -12,24 +12,59 @@ function FileInput({
     setFiles,
 }) {
 
-    const handleFileChange = (e) => {
+    // const handleFileChange = (e) => {
+    //     const selectedFiles = Array.from(e.target.files);
+
+    //     // Prevent duplicate files
+    //     const newFiles = selectedFiles.filter(
+    //         file =>
+    //             !files.some(
+    //                 f =>
+    //                     f.name === file.name &&
+    //                     f.size === file.size &&
+    //                     f.lastModified === file.lastModified
+    //             )
+    //     );
+
+    //     setFiles(prev => [...prev, ...newFiles]);
+
+    //     // Allow selecting the same file again after removing it
+    //     e.target.value = "";
+    // };
+
+    const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
 
-        // Prevent duplicate files
-        const newFiles = selectedFiles.filter(
-            file =>
-                !files.some(
-                    f =>
-                        f.name === file.name &&
-                        f.size === file.size &&
-                        f.lastModified === file.lastModified
-                )
-        );
+        try {
 
-        setFiles(prev => [...prev, ...newFiles]);
+            toast.loading("Compressing images...", { id: "compress" });
 
-        // Allow selecting the same file again after removing it
-        e.target.value = "";
+            const compressedFiles = await Promise.all(
+                selectedFiles.map(file => compressImage(file, 500))
+            );
+
+            console.log(compressedFiles);
+
+            toast.dismiss("compress");
+            // Prevent duplicate files
+            const newFiles = compressedFiles.filter(
+                file =>
+                    !files.some(
+                        f =>
+                            f.name === file.name &&
+                            f.size === file.size &&
+                            f.lastModified === file.lastModified
+                    )
+            );
+
+            setFiles(prev => [...prev, ...newFiles]);
+
+        } catch (err) {
+            toast.error("Image compression failed.");
+            console.error(err);
+        } finally {
+            e.target.value = "";
+        }
     };
 
     const removeFile = (index) => {
@@ -37,7 +72,7 @@ function FileInput({
     };
 
     return (
-        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+        <div className="w-full border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition overflow-hidden">
             <label className="block text-sm mb-2 text-gray-300">
                 {label}
             </label>
@@ -46,7 +81,7 @@ function FileInput({
                 type="file"
                 multiple
                 onChange={handleFileChange}
-                className="file:bg-cyan-600
+                className="w-full file:bg-cyan-600
                            file:hover:bg-cyan-700
                            file:border-0
                            file:rounded-md
@@ -409,7 +444,7 @@ export default function DeathClaim() {
                         coverage: formData.coverage,
                     }),
                 }
-            )            
+            )
 
             const data = await validate.json()
 
@@ -686,14 +721,30 @@ export default function DeathClaim() {
                         </div>
 
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
-                            <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
-                            <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} />
-                            <FileInput label="Death Certificate-City Corporation/UP/Commissioner" files={cityCorporationFiles} setFiles={setCityCorporationFiles} />
-                            <FileInput label="Death Certificate-Hospital" files={hospitalFiles} setFiles={setHospitalFiles} />
-                            <FileInput label="Death Certificate-From You" files={policyHolderFiles} setFiles={setPolicyHolderFiles} />
-                            <FileInput label="Post Mortem/Waiver Files" files={postMortemFiles} setFiles={setPostMortemFiles} />
-                            <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                            <div className="min-w-0">
+                                <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Death Certificate-City Corporation/UP/Commissioner" files={cityCorporationFiles} setFiles={setCityCorporationFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Death Certificate-Hospital" files={hospitalFiles} setFiles={setHospitalFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Death Certificate-From You" files={policyHolderFiles} setFiles={setPolicyHolderFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Post Mortem/Waiver Files" files={postMortemFiles} setFiles={setPostMortemFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                            </div>
                         </div>
 
                         <div className="flex justify-center">

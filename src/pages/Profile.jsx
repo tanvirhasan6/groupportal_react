@@ -12,7 +12,7 @@ import ChangePassword from "../components/ProfileComponent/ChangePassword"
 const ProfilePage = () => {
 
     const user = useUser()
-    const userid = user?.USERNAME    
+    const userid = user?.USERNAME
 
     const [activePanel, setActivePanel] = useState(null)
     const [accountData, setAccountData] = useState(null)
@@ -149,7 +149,7 @@ const ProfilePage = () => {
                     <div className="w-full text-gray-100 space-y-1">
 
                         {/* GRID START */}
-                        <div className="w-full grid grid-cols-2 gap-4">
+                        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
 
                             <InputBox
                                 label="Account No"
@@ -185,9 +185,8 @@ const ProfilePage = () => {
 
                         <div className="flex flex-wrap gap-3 my-6">
                             <button
-                                className={`px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-gray-100 ${
-                                    activePanel === "password" ? "bg-blue-600 text-white" : ""
-                                }`}
+                                className={`px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition text-gray-100 ${activePanel === "password" ? "bg-blue-600 text-white" : ""
+                                    }`}
                                 onClick={() => togglePanel("password")}
                             >
                                 Change Password
@@ -203,53 +202,67 @@ const ProfilePage = () => {
                 activePanel === "mobile" ||
                 activePanel === "password" ||
                 activePanel === "bank") && (
-                <div className="w-full max-w-4xl bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl">
+                    <div className="w-full max-w-4xl bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-xl">
 
-                    {activePanel === "email" && (
-                        <UpdateCard title="Update Email">
-                            <ChangeEmail />
-                        </UpdateCard>
-                    )}
+                        {activePanel === "email" && (
+                            <UpdateCard title="Update Email">
+                                <ChangeEmail />
+                            </UpdateCard>
+                        )}
 
-                    {activePanel === "mobile" && (
-                        <UpdateCard title="Update Mobile">
-                            <ChangeMobile />
-                        </UpdateCard>
-                    )}
+                        {activePanel === "mobile" && (
+                            <UpdateCard title="Update Mobile">
+                                <ChangeMobile />
+                            </UpdateCard>
+                        )}
 
-                    {activePanel === "password" && (
-                        <UpdateCard title="Change Password">
-                            <ChangePassword />
-                        </UpdateCard>
-                    )}
+                        {activePanel === "password" && (
+                            <UpdateCard title="Change Password">
+                                <ChangePassword />
+                            </UpdateCard>
+                        )}
 
-                    {activePanel === "bank" && (
-                        <UpdateCard title="Update Bank Info">
-                            <ChangeBank />
-                        </UpdateCard>
-                    )}
+                        {activePanel === "bank" && (
+                            <UpdateCard title="Update Bank Info">
+                                <ChangeBank />
+                            </UpdateCard>
+                        )}
 
-                </div>
-            )}
+                    </div>
+                )}
         </div>
     )
 }
 
+// const InputBox = ({ label, value, onClick }) => (
+//     <div className="flex flex-col w-full">
+//         <label className="text-gray-300 text-sm mb-1">{label}</label>
+//         <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-500 bg-transparent text-white w-full">
+//             <input
+//                 value={value || ""}
+//                 readOnly
+//                 className="bg-transparent flex-1 text-white focus:outline-none"
+//             />
+//             <button onClick={onClick} className="ml-2 text-gray-300 hover:text-white">
+//                 <FaEdit />
+//             </button>
+//         </div>
+//     </div>
+// )
+
 const InputBox = ({ label, value, onClick }) => (
-    <div className="flex flex-col w-full">
-        <label className="text-gray-300 text-sm mb-1">{label}</label>
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-500 bg-transparent text-white w-full">
-            <input
-                value={value || ""}
-                readOnly
-                className="bg-transparent flex-1 text-white focus:outline-none"
-            />
-            <button onClick={onClick} className="ml-2 text-gray-300 hover:text-white">
+    <div className="w-full">
+        <label className="block text-sm mb-1 text-gray-300">{label}</label>
+
+        <div className="flex items-center border border-gray-500 rounded-lg px-3 py-2 w-full">
+            <input value={value || ""} readOnly className="flex-1 w-0 bg-transparent text-white outline-none truncate" />
+
+            <button type="button" onClick={onClick} className="ml-2 shrink-0 text-gray-300 hover:text-white" >
                 <FaEdit />
             </button>
         </div>
     </div>
-)
+);
 
 const UpdateCard = ({ title, children }) => (
     <div className="w-full">

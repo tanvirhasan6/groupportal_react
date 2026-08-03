@@ -98,7 +98,7 @@ export default function DatePickerPopup({
         <div className="absolute top-full left-0 mt-2 z-50">
             <div
                 ref={ref}
-                className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-80 sm:w-96 animate-scale-in"
+                className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-full max-w-sm"
             >
 
                 {/* Header */}
@@ -124,7 +124,7 @@ export default function DatePickerPopup({
                                 if (year === sysYear && m > sysMonth) return; // prevent future month
                                 setMonth(m);
                             }}
-                            className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40"
+                            className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
                         >
                             {monthNames.map((m, i) => (
                                 <option
@@ -149,7 +149,7 @@ export default function DatePickerPopup({
                                     setMonth(sysMonth);
                                 }
                             }}
-                            className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40"
+                            className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
                         >
                             {years.map((y) => (
                                 <option key={y} value={y}>{y}</option>
@@ -163,8 +163,8 @@ export default function DatePickerPopup({
                         onClick={nextMonth}
                         disabled={year === sysYear && month === sysMonth}
                         className={`text-xl ${year === sysYear && month === sysMonth
-                                ? "text-gray-600 cursor-not-allowed"
-                                : "text-cyan-400"
+                            ? "text-gray-600 cursor-not-allowed"
+                            : "text-cyan-400"
                             }`}
                     >
                         →
@@ -179,7 +179,7 @@ export default function DatePickerPopup({
                 {/* Days */}
                 <div className="grid grid-cols-7 gap-1 text-center">
                     {daysArray.map((day, idx) => {
-                        if (!day) return <div key={idx} className="w-10 h-10"></div>;
+                        if (!day) return <div key={idx} className="w-6 h-6 text-sm sm:w-8 sm:h-8"></div>;
 
                         const disabled = isDisabled(day);
 
@@ -189,11 +189,12 @@ export default function DatePickerPopup({
                                 key={idx}
                                 disabled={disabled}
                                 onClick={() => handleSelect(day)}
-                                className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all
-                                ${disabled
-                                        ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                                        : "bg-gray-800 hover:bg-cyan-600 hover:text-black shadow-md hover:scale-110"
-                                    }`}
+                                className={`flex items-center justify-center rounded-lg transition-all
+                                        w-6 h-6 text-sm sm:w-8 sm:h-8
+                                        ${disabled
+                                            ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                                            : "bg-gray-800 hover:bg-cyan-600 hover:text-black"
+                                        }`}
                             >
                                 {day}
                             </button>

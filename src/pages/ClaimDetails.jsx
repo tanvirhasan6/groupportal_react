@@ -64,7 +64,7 @@ function FileInput({
     };
 
     return (
-        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+        <div className="w-full border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition overflow-hidden">
             <label className="block text-sm mb-2 text-gray-300">
                 {label}
             </label>
@@ -73,7 +73,8 @@ function FileInput({
                 type="file"
                 multiple
                 onChange={handleFileChange}
-                className="file:bg-cyan-600
+                className=" w-full
+                         file:bg-cyan-600
                            file:hover:bg-cyan-700
                            file:border-0
                            file:rounded-md
@@ -384,14 +385,16 @@ export default function ClaimDetails() {
             try {
 
                 data = JSON.parse(text)
-                console.log(data);
-                toast.success('Re-Upload Successfull')
-
-                setTimeout(() => {
-                    navigate("/dashboard", { replace: true });
-                    return;
-                }, 1000);
-
+                // console.log(data);
+                if (data?.success) {
+                    toast.success('Re-Upload Successfull')
+                    setTimeout(() => {
+                        navigate("/dashboard", { replace: true });
+                        return;
+                    }, 1000);
+                } else {
+                    toast.error('Re-Upload Failed')
+                }
 
             } catch {
                 console.error("Invalid JSON:", text)
@@ -401,6 +404,8 @@ export default function ClaimDetails() {
 
         } catch (err) {
             toast.error(`Upload failed: ${err}`)
+            setWorking(false)
+        } finally {
             setWorking(false)
         }
     }
@@ -439,12 +444,22 @@ export default function ClaimDetails() {
 
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {basicData.BENEFIT_CODE === '102' && (
-                                            <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} existingFiles={documentData} />
+                                            <div className="min-w-0">
+                                                <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} existingFiles={documentData} />
+                                            </div>
                                         )}
-                                        <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} existingFiles={documentData} />
-                                        <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} existingFiles={documentData} />
-                                        <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} existingFiles={documentData} />
-                                        <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} existingFiles={documentData} />
+                                        <div className="min-w-0">
+                                            <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} existingFiles={documentData} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} existingFiles={documentData} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} existingFiles={documentData} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} existingFiles={documentData} />
+                                        </div>
                                     </div>
 
                                     <div className="flex justify-center mt-5">

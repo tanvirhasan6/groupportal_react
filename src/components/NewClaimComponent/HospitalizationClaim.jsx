@@ -12,7 +12,7 @@ function FileInput({
     setFiles,
 }) {
 
-    const handleFileChange = async(e) => {
+    const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
 
         try {
@@ -52,7 +52,7 @@ function FileInput({
     };
 
     return (
-        <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
+        <div className="w-full border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition overflow-hidden">
             <label className="block text-sm mb-2 text-gray-300">
                 {label}
             </label>
@@ -61,7 +61,7 @@ function FileInput({
                 type="file"
                 multiple
                 onChange={handleFileChange}
-                className="file:bg-cyan-600
+                className="w-full file:bg-cyan-600
                            file:hover:bg-cyan-700
                            file:border-0
                            file:rounded-md
@@ -678,12 +678,18 @@ const HospitalizationClaim = () => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {formData.claimType === '102' && (
-                        <FileInput key="discharge" label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} />
+                        <div className="min-w-0"><FileInput key="discharge" label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} /></div>
                     )}
-                    <FileInput key="prescription" label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
-                    <FileInput key="medical" label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
-                    <FileInput key="moneyreceipt" label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
-                    <FileInput key="others" label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                    <div className="min-w-0">
+                        <FileInput key="prescription" label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
+                    </div>
+                    <div className="min-w-0">
+                        <FileInput key="medical" label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
+                    </div>
+                    <div className="min-w-0"></div><FileInput key="moneyreceipt" label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
+                    <div className="min-w-0">
+                        <FileInput key="others" label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                    </div>
                 </div>
 
                 <div className="flex justify-center">

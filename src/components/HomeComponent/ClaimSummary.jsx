@@ -211,7 +211,13 @@ export default function ClaimSummary() {
                                 </div>
 
                                 <div className='w-full flex flex-col justify-start gap-1'>
-                                    {![2, 8].includes(summary.STATUS) && (<p className='flex justify-start items-start gap-2 text-pink-300'><FcDecision /> {summary.STATUS_NAME}</p>)}
+                                    {summary.STATUS !== 2 && (<p className='flex justify-start items-start gap-2 text-pink-300'><FcDecision /> {summary.STATUS_NAME}</p>)}
+                                    
+                                    {summary.STATUS === 8 && (
+                                        <p className="text-red-400 text-xs mt-1">
+                                            {summary.ADDITIONAL_DOCUMENT_LIST}
+                                        </p>
+                                    )}
 
                                     {(summary.STATUS === 2 || summary.STATUS === 8) && (
                                         <StageProgress currentStep={summary.MIN_SEQUENCE} totalSteps={summary.MAX_SEQUENCE} />
