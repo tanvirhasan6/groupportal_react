@@ -23,7 +23,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="w-full mt-4 flex flex-col lg:flex-row gap-6 items-start">
+        {/* duty carrid by */}
         <Beneficiary />
+        {/* Policy holders info (facilities/obligations) */}
         <InfoDoc />
       </div>
       {

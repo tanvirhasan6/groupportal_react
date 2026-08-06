@@ -80,7 +80,7 @@ function LogIn({ onForgot, onPassword, onSuccess, }) {
     const policyData = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/policyList`,
+                `http://localhost:5002/api/grpclaimportal/policyList`,
                 {
                     method: "GET",
                 }
@@ -108,7 +108,7 @@ function LogIn({ onForgot, onPassword, onSuccess, }) {
         setError("");
 
         try {
-            const res = await fetch("http://localhost:5001/api/grpclaimportal/checkuserPassword", {
+            const res = await fetch("http://localhost:5002/api/grpclaimportal/checkuserPassword", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userid, policyno }),
@@ -246,7 +246,7 @@ function ForgotPassword({ onBack, onNext }) {
     const policyData = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/policyList`,
+                `http://localhost:5002/api/grpclaimportal/policyList`,
                 {
                     method: "GET",
                 }
@@ -275,7 +275,7 @@ function ForgotPassword({ onBack, onNext }) {
         setLoading(true);
         setError("");
         try {
-            const res = await fetch("http://localhost:5001/api/grpclaimportal/forgetPassword", {
+            const res = await fetch("http://localhost:5002/api/grpclaimportal/forgetPassword", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userid, policyno }),
@@ -402,7 +402,7 @@ function OTPInput({ onBack, password, userData }) {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/validateOtp`,
+                `http://localhost:5002/api/grpclaimportal/validateOtp`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -495,7 +495,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
 
 
         try {
-            const res = await fetch("http://localhost:5001/api/grpclaimportal/getPasswordOtp", {
+            const res = await fetch("http://localhost:5002/api/grpclaimportal/getPasswordOtp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -604,7 +604,7 @@ function PasswordLogin({ userData, onBack, onLogin }) {
         try {
 
             const res = await fetch(
-                "http://localhost:5001/api/grpclaimportal/checkuser",
+                "http://localhost:5002/api/grpclaimportal/checkuser",
                 {
                     method: "POST",
                     headers: {

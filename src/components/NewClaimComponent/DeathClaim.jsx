@@ -306,7 +306,7 @@ export default function DeathClaim() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/deathClaim/beneficiary?beneficiary=${i}&policyno=${user.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/deathClaim/beneficiary?beneficiary=${i}&policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -334,7 +334,7 @@ export default function DeathClaim() {
         setSlotData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/slot?userid=${i}&policyno=${user.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/claim/slot?userid=${i}&policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -358,7 +358,7 @@ export default function DeathClaim() {
         setBenefitData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/benifitList?userid=${formData.idno}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}&type=D`,
+                `http://localhost:5002/api/grpclaimportal/claim/benifitList?userid=${formData.idno}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}&type=D`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -377,7 +377,7 @@ export default function DeathClaim() {
         setDeathListData([])
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/deathClaim/deathReason`,
+                `http://localhost:5002/api/grpclaimportal/deathClaim/deathReason`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -400,7 +400,7 @@ export default function DeathClaim() {
         setDeathPlaceListData([])
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/deathClaim/deathPlace`,
+                `http://localhost:5002/api/grpclaimportal/deathClaim/deathPlace`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -430,7 +430,7 @@ export default function DeathClaim() {
         try {
 
             const validate = await fetch(
-                "http://localhost:5001/api/grpclaimportal/claim/validateClaim",
+                "http://localhost:5002/api/grpclaimportal/claim/validateClaim",
                 {
                     method: "POST",
                     headers: {
@@ -487,7 +487,7 @@ export default function DeathClaim() {
 
                 try {
                     const res = await fetch(
-                        `http://localhost:5001/api/grpclaimportal/deathClaim/submitClaim`,
+                        `http://localhost:5002/api/grpclaimportal/deathClaim/submitClaim`,
                         {
                             method: "POST",
                             body: submissionData,

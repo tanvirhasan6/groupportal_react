@@ -29,7 +29,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/getBanks?banktype=${val}`,
+                `http://localhost:5002/api/grpclaimportal/profile/getBanks?banktype=${val}`,
                 { method: "GET", credentials: "include" }
             );
 
@@ -63,7 +63,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/getBankBranch?banktype=${bankType}&bankcode=${val}`,
+                `http://localhost:5002/api/grpclaimportal/profile/getBankBranch?banktype=${bankType}&bankcode=${val}`,
                 { method: "GET", credentials: "include" }
             );
 
@@ -97,7 +97,7 @@ const ChangeBank = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/bankUpdate`,
+                `http://localhost:5002/api/grpclaimportal/profile/bankUpdate`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

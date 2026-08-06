@@ -88,7 +88,7 @@ const ChangeMobile = () => {
 
         try {
             const sendOtp = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mobileChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${mobile}&emailid=${user?.EMAIL}`,
+                `http://localhost:5002/api/grpclaimportal/profile/mobileChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${mobile}&emailid=${user?.EMAIL}`,
                 { method: 'GET', credentials: 'include' }
             );
 
@@ -122,7 +122,7 @@ const ChangeMobile = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/profile/mobileChangeOTPVerify?otpCode=${code}&mobile=${mobile}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}`,
+                `http://localhost:5002/api/grpclaimportal/profile/mobileChangeOTPVerify?otpCode=${code}&mobile=${mobile}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}`,
                 { method: 'GET', credentials: 'include' }
             );
 

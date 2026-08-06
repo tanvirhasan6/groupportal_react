@@ -47,7 +47,7 @@ export default function Faq() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/faqList?policyno=${user.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/faqList?policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",

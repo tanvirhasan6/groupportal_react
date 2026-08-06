@@ -145,7 +145,7 @@ export default function ClaimSummary() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claimSummaryListData?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/claimSummaryListData?userid=${user?.USERNAME}&policyno=${user?.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",

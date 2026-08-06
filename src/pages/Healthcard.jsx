@@ -65,7 +65,7 @@ export default function HealthCard() {
 
             try {
                 companyLogo = await loadImage(
-                    `http://localhost:5001/image-proxy?url=http://localhost/admin/img/${user.POLICY_NO}.png`,
+                    `http://localhost:5002/image-proxy?url=http://localhost/admin/img/${user.POLICY_NO}.png`,
                     true
                 );
             } catch {
@@ -74,7 +74,7 @@ export default function HealthCard() {
 
             try {
                 photo = await loadImage(
-                    `http://localhost:5001/image-proxy?url=http://localhost/web_docs/${user.USERNAME}.jpg`,
+                    `http://localhost:5002/image-proxy?url=http://localhost/web_docs/${user.USERNAME}.jpg`,
                     true
                 );
             } catch {

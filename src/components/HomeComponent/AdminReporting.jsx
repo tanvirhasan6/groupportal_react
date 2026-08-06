@@ -38,7 +38,7 @@ export default function AdminReporting() {
 
             try {
                 const res = await fetch(
-                    `http://localhost:5001/api/grpclaimportal/adminReportSummary?policyno=${user.POLICY_NO}&stDate=${stDate}&endDate=${endDate}`,
+                    `http://localhost:5002/api/grpclaimportal/adminReportSummary?policyno=${user.POLICY_NO}&stDate=${stDate}&endDate=${endDate}`,
                     {
                         method: "GET",
                         credentials: "include"

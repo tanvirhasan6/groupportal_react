@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
             try {
                 const res = await fetch(
-                    `http://localhost:5001/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
+                    `http://localhost:5002/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -73,11 +73,13 @@ const ProfilePage = () => {
         reader.readAsDataURL(file)
 
         const formData = new FormData()
+        formData.append("username", user?.USERNAME);
+        formData.append("policyno", user?.POLICY_NO);
         formData.append("image", file)
 
         try {
             const res = await fetch(
-                "http://localhost:5001/api/grpclaimportal/profile/uploadImage",
+                "http://localhost:5002/api/grpclaimportal/profile/uploadImage",
                 {
                     method: "POST",
                     body: formData,
@@ -87,7 +89,8 @@ const ProfilePage = () => {
 
             const text = await res.text()
             let data
-
+            console.log(data);
+            
             try {
                 data = JSON.parse(text)
             } catch {

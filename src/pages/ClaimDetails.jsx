@@ -143,7 +143,7 @@ export default function ClaimDetails() {
         try {
 
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claimDetails?intno=${i}`,
+                `http://localhost:5002/api/grpclaimportal/claimDetails?intno=${i}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -185,7 +185,7 @@ export default function ClaimDetails() {
         setWorking(true)
         try {
             const response = await fetch(
-                "http://localhost:5001/api/grpclaimportal/claimSettlementReport",
+                "http://localhost:5002/api/grpclaimportal/claimSettlementReport",
                 {
                     method: "POST",
                     headers: {
@@ -368,7 +368,7 @@ export default function ClaimDetails() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/reUploadDocuments`,
+                `http://localhost:5002/api/grpclaimportal/claim/reUploadDocuments`,
                 {
                     method: "POST",
                     body: submissionData,

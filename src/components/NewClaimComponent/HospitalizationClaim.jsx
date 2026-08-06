@@ -256,7 +256,7 @@ const HospitalizationClaim = () => {
         setSlotData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/claim/slot?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -280,7 +280,7 @@ const HospitalizationClaim = () => {
         setBenefitData([]);
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}&type=H`,
+                `http://localhost:5002/api/grpclaimportal/claim/benifitList?userid=${user?.USERNAME}&policyno=${user.POLICY_NO}&slotstart=${selectedSlot?.SLOT_START}&slotend=${selectedSlot?.SLOT_END}&type=H`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -298,7 +298,7 @@ const HospitalizationClaim = () => {
     const diseasesList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/diseases`,
+                `http://localhost:5002/api/grpclaimportal/claim/diseases`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -320,7 +320,7 @@ const HospitalizationClaim = () => {
     const hospitalList = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/claim/hospitals`,
+                `http://localhost:5002/api/grpclaimportal/claim/hospitals`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -418,7 +418,7 @@ const HospitalizationClaim = () => {
         try {
 
             const validate = await fetch(
-                "http://localhost:5001/api/grpclaimportal/claim/validateClaim",
+                "http://localhost:5002/api/grpclaimportal/claim/validateClaim",
                 {
                     method: "POST",
                     headers: {
@@ -472,7 +472,7 @@ const HospitalizationClaim = () => {
 
                 try {
                     const res = await fetch(
-                        `http://localhost:5001/api/grpclaimportal/claim/submitClaim`,
+                        `http://localhost:5002/api/grpclaimportal/claim/submitClaim`,
                         {
                             method: "POST",
                             body: submissionData,

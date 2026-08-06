@@ -44,7 +44,7 @@ export default function App() {
 
     try {
       const res = await fetch(
-        "http://localhost:5001/api/grpclaimportal/current-user",
+        "http://localhost:5002/api/grpclaimportal/current-user",
         {
           method: "GET",
           credentials: "include",
@@ -128,7 +128,7 @@ export default function App() {
   const handleLogout = async () => {
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:5001/api/grpclaimportal/logout", {
+      const res = await fetch("http://localhost:5002/api/grpclaimportal/logout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userid: userInfo.USERNAME, policyno: userInfo.POLICY_NO }),

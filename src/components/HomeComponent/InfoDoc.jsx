@@ -15,7 +15,7 @@ export default function InfoDoc() {
 
         try {
             const res = await fetch(
-                `http://localhost:5001/api/grpclaimportal/infoDocList?policyno=${user?.POLICY_NO}`,
+                `http://localhost:5002/api/grpclaimportal/infoDocList?policyno=${user?.POLICY_NO}`,
                 {
                     method: "GET",
                     credentials: "include",
@@ -23,7 +23,7 @@ export default function InfoDoc() {
             )
 
             const data = await res.json()
-            
+
             if (data?.status === 200) setDocData(data?.result)
             else toast.error(data?.message)
 
@@ -65,57 +65,39 @@ export default function InfoDoc() {
             {/* MODAL */}
             {openModal && selectedDoc && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4"
+                    className="fixed inset-0 z-50 bg-black/60 overflow-y-auto"
                     onClick={() => setOpenModal(false)}
                 >
-                    <div
-                        className="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-y-auto"
-                        style={{ maxHeight: "90vh" }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* HEADER */}
-                        <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                            <h2 className="text-lg font-semibold">{selectedDoc.DOC_NAME}</h2>
-                            <button
-                                className="text-red-500 font-bold text-xl"
-                                onClick={() => setOpenModal(false)}
-                            >
-                                ×
-                            </button>
-                        </div>
+                    <div className="min-h-screen flex items-start justify-center p-4 py-8">
+                        <div
+                            className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* HEADER */}
+                            <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                                <h2 className="text-lg font-semibold">
+                                    {selectedDoc.DOC_NAME}
+                                </h2>
+                                <button
+                                    className="text-red-500 font-bold text-xl"
+                                    onClick={() => setOpenModal(false)}
+                                >
+                                    ×
+                                </button>
+                            </div>
 
-                        {/* BODY */}
-                        <div className="p-4 flex justify-center items-center">
-                            <div className="relative overflow-hidden rounded-lg border border-gray-300"
-                                style={{
-                                    maxHeight: "80vh",
-                                    maxWidth: "100%",
-                                }}
-                            >
-                                <img
-                                    src={`http://localhost/zilil_group/file/${selectedDoc.PIC_NAME_ID}.jpg`}
-                                    alt={selectedDoc.DOC_NAME}
-                                    className="transition-transform duration-300 ease-in-out"
-                                    style={{
-                                        width: "100%",
-                                        height: "auto",
-                                    }}
-                                    onMouseMove={(e) => {
-                                        const img = e.currentTarget;
-                                        const rect = img.getBoundingClientRect();
-                                        const x = ((e.clientX - rect.left) / rect.width) * 100;
-                                        const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-                                        // zoom scale with 10% margin
-                                        img.style.transformOrigin = `${x}% ${y}%`;
-                                        img.style.transform = "scale(1.5)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        const img = e.currentTarget;
-                                        img.style.transform = "scale(1)";
-                                        img.style.transformOrigin = "center";
-                                    }}
-                                />
+                            {/* BODY */}
+                            <div className="flex-1 overflow-y-auto p-4">
+                                <div className="flex justify-center">
+                                    <img
+                                        src={`http://localhost/zilil_group/file/${selectedDoc.PIC_NAME_ID}.jpg`}
+                                        alt={selectedDoc.DOC_NAME}
+                                        className="w-full h-auto"
+                                        style={{
+                                            width: "900px",   // or 1000px depending on your document
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
