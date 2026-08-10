@@ -12,11 +12,14 @@ import ChangePassword from "../components/ProfileComponent/ChangePassword"
 const ProfilePage = () => {
 
     const user = useUser()
-    const userid = user?.USERNAME
+    const userid = user?.USERNAME       
+    const policyno = user?.POLICY_NO 
 
     const [activePanel, setActivePanel] = useState(null)
     const [accountData, setAccountData] = useState(null)
     const [imageSrc, setImageSrc] = useState(null)
+
+    const [uploading, setUploading] = useState(false);
 
     const fileInputRef = useRef(null)
 
@@ -31,8 +34,9 @@ const ProfilePage = () => {
         const fetchBankData = async () => {
 
             try {
+
                 const res = await fetch(
-                    `http://localhost:5002/api/grpclaimportal/profile/basicInfo?userid=${userid}`,
+                    `http://localhost:5002/api/grpclaimportal/profile/basicInfo?userid=${userid}&policyno=${policyno}`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -78,6 +82,7 @@ const ProfilePage = () => {
         formData.append("image", file)
 
         try {
+            setUploading(true);
             const res = await fetch(
                 "http://localhost:5002/api/grpclaimportal/profile/uploadImage",
                 {
@@ -90,17 +95,23 @@ const ProfilePage = () => {
             const text = await res.text()
             let data
             console.log(data);
-            
+
+            if (!res.ok) {
+                throw new Error("Upload failed");
+            }
+
             try {
                 data = JSON.parse(text)
+                toast.success( data?.message)
             } catch {
-                console.error("Invalid JSON:", text)
+                toast.error("Upload failed");
                 return
             }
 
-            console.log("Upload:", data?.message)
         } catch (err) {
             toast.error(`Upload failed: ${err}`)
+        } finally {
+            setUploading(false);
         }
     }
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaBars, FaTimes, FaSignOutAlt } from "react-icons/fa";
 import { Sidebar } from "./Sidebar";
 import { Outlet } from "react-router-dom";
+import Breadcrumb from "./Breadcrumb";
 
 export default function DashboardLayout({ children, userInfo, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -62,6 +63,7 @@ export default function DashboardLayout({ children, userInfo, onLogout }) {
 
         {/* Page content */}
         <main className="flex-1 p-6 overflow-y-auto">
+          <Breadcrumb />
           <Outlet />
         </main>
       </div>

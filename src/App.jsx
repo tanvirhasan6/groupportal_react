@@ -8,6 +8,7 @@ import ClaimDetails from "./pages/ClaimDetails";
 import Manage from "./pages/Manage";
 import Missing from "./pages/Missing";
 import Swal from "sweetalert2"
+import DirectLogin from "./pages/DirectLogin"
 const Login = lazy(() => import("./pages/Login"));
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -95,27 +96,27 @@ export default function App() {
   }
 
   useEffect(() => {
-    checkAuth();   
+    checkAuth();
   }, []);
 
   useEffect(() => {
     if (!userInfo) {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-        return;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      return;
     }
 
     intervalRef.current = setInterval(() => {
-        checkAuth();
+      checkAuth();
     }, 10000);
 
     return () => {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     };
-}, [userInfo]);
+  }, [userInfo]);
 
   const stopPolling = () => {
     if (intervalRef.current) {
@@ -163,6 +164,16 @@ export default function App() {
               path="/login"
               element={userInfo ? <Navigate to="/dashboard" replace /> : <Login onLogin={checkAuth} />}
             />
+
+            <Route
+              path="/groupDirectLogin"
+              element={userInfo ? <Navigate to="/dashboard" replace /> : <DirectLogin onLogin={checkAuth} />}
+            />
+
+            {/* <Route
+              path="/groupDirectLogin"
+              element={<DirectLogin onLogin={checkAuth}/>}
+            /> */}
 
             {/* Dashboard layout with nested routes */}
             <Route

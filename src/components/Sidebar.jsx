@@ -52,7 +52,8 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             bg-gray-800 border-r border-gray-700
             transform transition-transform duration-300 ease-in-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            overflow-hidden flex flex-col z-40`}
+            flex flex-col z-40`}
+
         >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 text-sm">
@@ -60,6 +61,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     <img
                         src={`http://localhost/admin/img/${user?.POLICY_NO}.png`}
                         alt="User Logo"
+                        className="w-28 h-auto"
                     />
                     <h2 className={`font-semibold text-gray-400 ${sidebarOpen ? "" : "hidden"}`}>
                         {user?.ORGANIZATION}
@@ -72,9 +74,9 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <hr className="w-[90%] mx-auto bg-gray-600 text-gray-700" />
 
             {/* Navigation */}
-            <nav className="flex flex-col p-4 space-y-2 text-gray-300">
+            <nav className="flex-1 overflow-y-auto p-4 space-y-2 text-gray-300">
                 <Link
-                    className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex flex-row gap-2 items-center"
+                    className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex gap-2 items-center"
                     to="/dashboard"
                     onClick={handleLinkClick}
                 >
@@ -84,7 +86,7 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 {menus.map((menu, index) => (
                     <Link
                         key={index}
-                        className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex flex-row gap-2 items-center"
+                        className="text-left px-4 py-2 rounded-lg hover:bg-gray-700 hover:text-cyan-400 flex gap-2 items-center"
                         to={`/dashboard/${menu.toLowerCase().replace(/\s+/g, "")}`}
                         onClick={handleLinkClick}
                     >
