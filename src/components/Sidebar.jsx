@@ -11,6 +11,7 @@ import {
     FaCog,
     FaExclamationCircle
 } from "react-icons/fa";
+import { PiFolderSimpleStarThin, PiListChecks } from "react-icons/pi";
 
 export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
@@ -21,11 +22,11 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     let menus;
 
     if (groupCode === "100") {
-        menus = ["Manage", "Missing Info"];
+        menus = ["Manage", "Missing Info", "All Claims"];
     } else if (groupCode === "0") {
-        menus = ["Profile", "Health Card"];
+        menus = ["Profile", "Health Card", "All Claims"];
     } else {
-        menus = ["Profile"];
+        menus = ["Profile", "All Claims"];
     }
 
     menus.push("FAQ", "Hospitals", "New Claim")
@@ -34,7 +35,8 @@ export const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     const iconMap = {
         "Profile": <FaUser />,
-        "New Claim": <FaFileAlt />,
+        "All Claims": <PiListChecks/> , 
+        "New Claim": <PiFolderSimpleStarThin />,
         "Health Card": <FaHeartbeat />,
         "Hospitals": <FaHospital />,
         "Death Claim": <FaClipboardList />,

@@ -10,6 +10,8 @@ const ChangeMobile = () => {
     const [otp, setOtp] = useState(Array(8).fill(''));
     const inputsOTPRef = useRef([]);
     const [loading, setLoading] = useState(false);
+    const [otpRequested, setOtpRequested] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
     const [otpLoading, setOtpLoading] = useState(false);
 
     // Validate Bangladeshi mobile number
@@ -88,9 +90,21 @@ const ChangeMobile = () => {
 
         try {
             const sendOtp = await fetch(
-                `http://localhost:5002/api/grpclaimportal/profile/mobileChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${mobile}&emailid=${user?.EMAIL}`,
-                { method: 'GET', credentials: 'include' }
-            );
+                `http://localhost:5002/api/grpclaimportal/profile/mobileChange`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        policyno: user?.POLICY_NO,
+                        userid: user?.USERNAME,
+                        mobile: mobile,
+                        emailid: user?.EMAIL,
+                    }),
+                }
+            )
 
             const data = await sendOtp.json();
             // console.log(data);
@@ -101,6 +115,8 @@ const ChangeMobile = () => {
 
             if (data?.status === 200) {
                 toast.success("OTP sent to your email");
+                setOtpRequested(true)
+                setOtpSent(true)
             }
 
         } catch (error) {
@@ -122,8 +138,20 @@ const ChangeMobile = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5002/api/grpclaimportal/profile/mobileChangeOTPVerify?otpCode=${code}&mobile=${mobile}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}`,
-                { method: 'GET', credentials: 'include' }
+                `http://localhost:5002/api/grpclaimportal/profile/mobileChangeOTPVerify`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        otpCode: code,
+                        mobile: mobile,
+                        policyno: user?.POLICY_NO,
+                        userid: user?.USERNAME,
+                    }),
+                }
             );
 
             const data = await res.json();
@@ -142,6 +170,7 @@ const ChangeMobile = () => {
         }
 
         setOtpLoading(false);
+
     };
 
     return (
@@ -157,18 +186,18 @@ const ChangeMobile = () => {
                     onChange={(e) => setMobile(e.target.value)}
                 />
 
-                {!loading && (
+                {!otpRequested && (
                     <button
                         type="button"
                         className="text-sm text-cyan-400 hover:underline disabled:opacity-50"
                         onClick={handleMobileUpdate}
                     >
-                        Submit
+                        {loading ? 'Requesting' : 'Submit'}
                     </button>
                 )}
             </div>
 
-            {loading && (
+            {otpSent && (
                 <div className='mt-3 flex flex-col items-center gap-3'>
                     <div className="flex justify-center gap-1.5 sm:gap-3">
                         {otp.map((val, i) => (

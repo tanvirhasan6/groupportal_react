@@ -11,47 +11,120 @@ function FileInput({
     existingFiles = [],
 }) {
 
+    // const handleFileChange = async (e) => {
+    //     if (!e.target.files) return;
+
+    //     const selectedFiles = Array.from(e.target.files);
+
+    //     try {
+
+    //         toast.loading("Compressing images...", { id: "compress" });
+
+    //         const compressedFiles = await Promise.all(
+    //             selectedFiles.map(file => compressImage(file, 500))
+    //         );
+
+    //         toast.dismiss("compress");
+
+    //         const filtered = compressedFiles.filter(file => {
+    //             const name = file.name.trim();
+
+    //             if (existingFiles.includes(name)) {
+    //                 toast.error(`"${name}" is already uploaded earlier.`);
+    //                 return false;
+    //             }
+
+    //             if (
+    //                 files.some(
+    //                     f =>
+    //                         f.name === file.name &&
+    //                         f.size === file.size &&
+    //                         f.lastModified === file.lastModified
+    //                 )
+    //             ) {
+    //                 toast.error(`"${name}" is already selected.`);
+    //                 return false;
+    //             }
+
+    //             return true;
+    //         });
+
+    //         setFiles(prev => [...prev, ...filtered]);
+
+    //     } catch (err) {
+    //         toast.error("Image compression failed.");
+    //         console.error(err);
+    //     } finally {
+    //         e.target.value = "";
+    //     }
+    // };
+
     const handleFileChange = async (e) => {
         if (!e.target.files) return;
 
         const selectedFiles = Array.from(e.target.files);
 
         try {
-
-            toast.loading("Compressing images...", { id: "compress" });
-
-            const compressedFiles = await Promise.all(
-                selectedFiles.map(file => compressImage(file, 500))
-            );
-
-            toast.dismiss("compress");
-
-            const filtered = compressedFiles.filter(file => {
+            // Filter duplicates by filename BEFORE compression
+            const filteredSelectedFiles = selectedFiles.filter((file, index, arr) => {
                 const name = file.name.trim();
 
+                // Already uploaded earlier
                 if (existingFiles.includes(name)) {
                     toast.error(`"${name}" is already uploaded earlier.`);
                     return false;
                 }
 
-                if (
-                    files.some(
-                        f =>
-                            f.name === file.name &&
-                            f.size === file.size &&
-                            f.lastModified === file.lastModified
-                    )
-                ) {
+                // Already selected in current files
+                if (files.some(f => f.name.trim() === name)) {
                     toast.error(`"${name}" is already selected.`);
+                    return false;
+                }
+
+                // Duplicate within the current file selection
+                if (
+                    arr.findIndex(
+                        f => f.name.trim() === name
+                    ) !== index
+                ) {
+                    toast.error(`"${name}" is selected more than once.`);
                     return false;
                 }
 
                 return true;
             });
 
-            setFiles(prev => [...prev, ...filtered]);
+            if (filteredSelectedFiles.length === 0) {
+                e.target.value = "";
+                return;
+            }
+
+            toast.loading("Compressing images...", {
+                id: "compress",
+            });
+
+            const compressedFiles = await Promise.all(
+                filteredSelectedFiles.map(async (file) => {
+                    const compressed = await compressImage(file, 500);
+
+                    // Make sure compressed file keeps original filename
+                    return new File(
+                        [compressed],
+                        file.name,
+                        {
+                            type: compressed.type,
+                            lastModified: file.lastModified,
+                        }
+                    );
+                })
+            );
+
+            toast.dismiss("compress");
+
+            setFiles(prev => [...prev, ...compressedFiles]);
 
         } catch (err) {
+            toast.dismiss("compress");
             toast.error("Image compression failed.");
             console.error(err);
         } finally {
@@ -442,23 +515,23 @@ export default function ClaimDetails() {
 
                                 <form id="additionalform" onSubmit={handleSubmit}>
 
-                                    <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         {basicData.BENEFIT_CODE === '102' && (
                                             <div className="min-w-0">
-                                                <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} existingFiles={documentData} />
+                                                <FileInput label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} existingFiles={documentData} allFiles={allSelectedFiles}/>
                                             </div>
                                         )}
                                         <div className="min-w-0">
-                                            <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} existingFiles={documentData} />
+                                            <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} existingFiles={documentData} allFiles={allSelectedFiles}/>
                                         </div>
                                         <div className="min-w-0">
-                                            <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} existingFiles={documentData} />
+                                            <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} existingFiles={documentData} allFiles={allSelectedFiles}/>
                                         </div>
                                         <div className="min-w-0">
-                                            <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} existingFiles={documentData} />
+                                            <FileInput label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} existingFiles={documentData} allFiles={allSelectedFiles}/>
                                         </div>
                                         <div className="min-w-0">
-                                            <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} existingFiles={documentData} />
+                                            <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} existingFiles={documentData} allFiles={allSelectedFiles}/>
                                         </div>
                                     </div>
 

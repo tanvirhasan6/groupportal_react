@@ -74,10 +74,19 @@ const ChangeEmail = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5002/api/grpclaimportal/profile/mailChange?policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&mobile=${user?.MOBILE}&emailid=${email}`,
+                `http://localhost:5002/api/grpclaimportal/profile/mailChange`,
                 {
-                    method: "GET",
+                    method: "POST",
                     credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        policyno: user?.POLICY_NO,
+                        userid: user?.USERNAME,
+                        mobile: user?.MOBILE,
+                        emailid: email,
+                    }),
                 }
             );
 
@@ -113,10 +122,20 @@ const ChangeEmail = () => {
 
         try {
             const res = await fetch(
-                `http://localhost:5002/api/grpclaimportal/profile/mailChangeOTPVerify?otpCode=${code}&emailid=${email}&policyno=${user?.POLICY_NO}&userid=${user?.USERNAME}&password=${user?.PASSWORD}`,
+                `http://localhost:5002/api/grpclaimportal/profile/mailChangeOTPVerify`,
                 {
-                    method: "GET",
+                    method: "POST",
                     credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        otpCode: code,
+                        emailid: email,
+                        policyno: user?.POLICY_NO,
+                        userid: user?.USERNAME,
+                        password: user?.PASSWORD,
+                    }),
                 }
             );
 

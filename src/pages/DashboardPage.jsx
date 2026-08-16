@@ -9,6 +9,7 @@ import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import AdminClaimSummary from "../components/HomeComponent/AdminClaimSummary";
 import AdminReporting from "../components/HomeComponent/AdminReporting";
+import AllClaims from "./AllClaim";
 
 export default function DashboardPage() {
   const user = useUser();
@@ -44,8 +45,9 @@ export default function DashboardPage() {
 
       {
         user.GROUP_CODE !== '0' &&
-        <div className="w-full">
+        <div className="w-full flex flex-col gap-3">
           <AdminClaimSummary />
+          {/* <AllClaims/> */}
         </div>
       }
 
@@ -53,7 +55,6 @@ export default function DashboardPage() {
         user.GROUP_CODE === '100' &&
         <AdminReporting/>
       }
-
 
       <div className="hidden animate-[moveStripes_1.2s_linear_infinite]"></div>
 

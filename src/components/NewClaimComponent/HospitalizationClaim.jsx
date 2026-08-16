@@ -10,36 +10,59 @@ function FileInput({
     label,
     files = [],
     setFiles,
+    allFiles = [],
 }) {
 
     const handleFileChange = async (e) => {
+        if (!e.target.files) return;
+
         const selectedFiles = Array.from(e.target.files);
 
         try {
+            // Check filename against ALL file inputs
+            const newFiles = selectedFiles.filter((file, index, arr) => {
+                const fileName = file.name.trim().toLowerCase();
 
-            toast.loading("Compressing images...", { id: "compress" });
+                // Already selected anywhere
+                const alreadyExists = allFiles.some(
+                    f => f.name.trim().toLowerCase() === fileName
+                );
+
+                if (alreadyExists) {
+                    toast.error(`"${file.name}" is already selected.`);
+                    return false;
+                }
+
+                // Duplicate within the same file chooser selection
+                const duplicateInCurrentSelection = arr.findIndex(
+                    f => f.name.trim().toLowerCase() === fileName
+                ) !== index;
+
+                if (duplicateInCurrentSelection) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (newFiles.length === 0) {
+                return;
+            }
+
+            toast.loading("Compressing images...", {
+                id: "compress",
+            });
 
             const compressedFiles = await Promise.all(
-                selectedFiles.map(file => compressImage(file, 500))
+                newFiles.map(file => compressImage(file, 500))
             );
-
-            console.log(compressedFiles);
 
             toast.dismiss("compress");
-            // Prevent duplicate files
-            const newFiles = compressedFiles.filter(
-                file =>
-                    !files.some(
-                        f =>
-                            f.name === file.name &&
-                            f.size === file.size &&
-                            f.lastModified === file.lastModified
-                    )
-            );
 
-            setFiles(prev => [...prev, ...newFiles]);
+            setFiles(prev => [...prev, ...compressedFiles]);
 
         } catch (err) {
+            toast.dismiss("compress");
             toast.error("Image compression failed.");
             console.error(err);
         } finally {
@@ -678,17 +701,19 @@ const HospitalizationClaim = () => {
 
                 <div className="grid md:grid-cols-2 gap-6">
                     {formData.claimType === '102' && (
-                        <div className="min-w-0"><FileInput key="discharge" label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} /></div>
+                        <div className="min-w-0"><FileInput key="discharge" label="Discharge Files" files={dischargeFiles} setFiles={setDischargeFiles} allFiles={allSelectedFiles} /></div>
                     )}
                     <div className="min-w-0">
-                        <FileInput key="prescription" label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
+                        <FileInput key="prescription" label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} allFiles={allSelectedFiles} />
                     </div>
                     <div className="min-w-0">
-                        <FileInput key="medical" label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
+                        <FileInput key="medical" label="Medical Test Files" files={testFiles} setFiles={setTestFiles} allFiles={allSelectedFiles} />
                     </div>
-                    <div className="min-w-0"></div><FileInput key="moneyreceipt" label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} />
                     <div className="min-w-0">
-                        <FileInput key="others" label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                        <FileInput key="moneyreceipt" label="Money Receipt/ Bill Files" files={receiptFiles} setFiles={setReceiptFiles} allFiles={allSelectedFiles} />
+                    </div>
+                    <div className="min-w-0">
+                        <FileInput key="others" label="Other Files" files={otherFiles} setFiles={setOtherFiles} allFiles={allSelectedFiles} />
                     </div>
                 </div>
 

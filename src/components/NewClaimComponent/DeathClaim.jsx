@@ -10,56 +10,105 @@ function FileInput({
     label,
     files = [],
     setFiles,
+    allFiles = [],
 }) {
 
-    // const handleFileChange = (e) => {
+    // const handleFileChange = async (e) => {
     //     const selectedFiles = Array.from(e.target.files);
 
-    //     // Prevent duplicate files
-    //     const newFiles = selectedFiles.filter(
-    //         file =>
-    //             !files.some(
-    //                 f =>
-    //                     f.name === file.name &&
-    //                     f.size === file.size &&
-    //                     f.lastModified === file.lastModified
-    //             )
-    //     );
+    //     try {
 
-    //     setFiles(prev => [...prev, ...newFiles]);
+    //         const newFiles = selectedFiles.filter(
+    //             file =>
+    //                 !files.some(
+    //                     f =>
+    //                         f.name === file.name &&
+    //                         f.size === file.size &&
+    //                         f.lastModified === file.lastModified
+    //                 )
+    //         );
 
-    //     // Allow selecting the same file again after removing it
-    //     e.target.value = "";
+    //         if (newFiles.length === 0) {
+    //             toast.error("This image has already been selected.");
+    //             return;
+    //         }
+
+    //         // If some files are duplicates
+    //         if (newFiles.length < selectedFiles.length) {
+    //             toast.error("Duplicate image(s) skipped.");
+    //         }
+
+    //         toast.loading("Compressing images...", { id: "compress" });
+
+    //         const compressedFiles = await Promise.all(
+    //             selectedFiles.map(file => compressImage(file, 500))
+    //         );
+
+    //         console.log(compressedFiles);
+
+    //         toast.dismiss("compress");
+    //         // Prevent duplicate files
+
+    //         setFiles(prev => [...prev, ...newFiles]);
+
+    //     } catch (err) {
+    //         toast.error("Image compression failed.");
+    //         console.error(err);
+    //     } finally {
+    //         e.target.value = "";
+    //     }
     // };
 
     const handleFileChange = async (e) => {
+        if (!e.target.files) return;
+
         const selectedFiles = Array.from(e.target.files);
 
         try {
+            // Check filename against ALL file inputs
+            const newFiles = selectedFiles.filter((file, index, arr) => {
+                const fileName = file.name.trim().toLowerCase();
 
-            toast.loading("Compressing images...", { id: "compress" });
+                // Already selected anywhere
+                const alreadyExists = allFiles.some(
+                    f => f.name.trim().toLowerCase() === fileName
+                );
+
+                if (alreadyExists) {
+                    toast.error(`"${file.name}" is already selected.`);
+                    return false;
+                }
+
+                // Duplicate within the same file chooser selection
+                const duplicateInCurrentSelection = arr.findIndex(
+                    f => f.name.trim().toLowerCase() === fileName
+                ) !== index;
+
+                if (duplicateInCurrentSelection) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (newFiles.length === 0) {
+                return;
+            }
+
+            toast.loading("Compressing images...", {
+                id: "compress",
+            });
 
             const compressedFiles = await Promise.all(
-                selectedFiles.map(file => compressImage(file, 500))
+                newFiles.map(file => compressImage(file, 500))
             );
-
-            console.log(compressedFiles);
 
             toast.dismiss("compress");
-            // Prevent duplicate files
-            const newFiles = compressedFiles.filter(
-                file =>
-                    !files.some(
-                        f =>
-                            f.name === file.name &&
-                            f.size === file.size &&
-                            f.lastModified === file.lastModified
-                    )
-            );
 
-            setFiles(prev => [...prev, ...newFiles]);
+            setFiles(prev => [...prev, ...compressedFiles]);
 
         } catch (err) {
+            toast.dismiss("compress");
             toast.error("Image compression failed.");
             console.error(err);
         } finally {
@@ -722,28 +771,28 @@ export default function DeathClaim() {
 
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="min-w-0">
-                                <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} />
+                                <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} />
+                                <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} />
+                                <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Death Certificate-City Corporation/UP/Commissioner" files={cityCorporationFiles} setFiles={setCityCorporationFiles} />
+                                <FileInput label="Death Certificate-City Corporation/UP/Commissioner" files={cityCorporationFiles} setFiles={setCityCorporationFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Death Certificate-Hospital" files={hospitalFiles} setFiles={setHospitalFiles} />
+                                <FileInput label="Death Certificate-Hospital" files={hospitalFiles} setFiles={setHospitalFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Death Certificate-From You" files={policyHolderFiles} setFiles={setPolicyHolderFiles} />
+                                <FileInput label="Death Certificate-From You" files={policyHolderFiles} setFiles={setPolicyHolderFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Post Mortem/Waiver Files" files={postMortemFiles} setFiles={setPostMortemFiles} />
+                                <FileInput label="Post Mortem/Waiver Files" files={postMortemFiles} setFiles={setPostMortemFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
-                                <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} />
+                                <FileInput label="Other Files" files={otherFiles} setFiles={setOtherFiles} allFiles={allSelectedFiles} />
                             </div>
                         </div>
 

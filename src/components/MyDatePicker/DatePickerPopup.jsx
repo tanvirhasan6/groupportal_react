@@ -1,3 +1,216 @@
+// import { useState, useEffect, useRef } from "react";
+
+// export default function DatePickerPopup({
+//     open,
+//     onClose,
+//     onSelect,
+//     minDate,
+//     maxDate,
+//     containerRef,
+// }) {
+//     const ref = useRef(null);
+//     const today = new Date();
+
+//     const sysYear = today.getFullYear();
+//     const sysMonth = today.getMonth();
+
+//     const normalize = (d) => {
+//         if (!d) return null;
+//         return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+//     };
+
+//     const min = normalize(minDate);
+//     const max = normalize(maxDate) || normalize(today);
+
+//     const [month, setMonth] = useState(today.getMonth());
+//     const [year, setYear] = useState(today.getFullYear());
+
+//     const [position, setPosition] = useState("left");
+
+//     useEffect(() => {
+//         if (open) {
+//             setMonth(today.getMonth());
+//             setYear(today.getFullYear());
+//         }
+//     }, [open]);
+
+//     useEffect(() => {
+//         const handleClickOutside = (e) => {
+//             if (ref.current && !ref.current.contains(e.target)) onClose();
+//         };
+//         if (open) document.addEventListener("mousedown", handleClickOutside);
+//         return () => document.removeEventListener("mousedown", handleClickOutside);
+//     }, [open]);
+
+//     if (!open) return null;
+
+//     // Calendar days
+//     const firstDayOfMonth = new Date(year, month, 1).getDay();
+//     const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+//     const daysArray = [];
+
+//     for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
+//     for (let i = 1; i <= totalDaysInMonth; i++) daysArray.push(i);
+
+//     // Month navigation
+//     const prevMonth = () => {
+//         if (month === 0) {
+//             setYear(year - 1);
+//             setMonth(11);
+//         } else {
+//             setMonth(month - 1);
+//         }
+//     };
+
+//     const nextMonth = () => {
+//         if (year === sysYear && month === sysMonth) return; // block future
+//         if (month === 11) {
+//             setYear(year + 1);
+//             setMonth(0);
+//         } else {
+//             setMonth(month + 1);
+//         }
+//     };
+
+//     const monthNames = [
+//         "January", "February", "March", "April", "May", "June",
+//         "July", "August", "September", "October", "November", "December"
+//     ];
+
+//     const isDisabled = (day) => {
+//         if (!day) return true;
+//         const date = new Date(year, month, day);
+//         if (min && date < min) return true;
+//         if (max && date > max) return true;
+//         return false;
+//     };
+
+//     const handleSelect = (day) => {
+//         if (!day || isDisabled(day)) return;
+//         const selectedDate = new Date(year, month, day);
+//         onSelect(selectedDate);
+//         onClose();
+//     };
+
+//     // Generate Year Range (1950 → current year)
+//     const years = [];
+//     for (let y = 1950; y <= sysYear; y++) years.push(y);
+
+//     return (
+//         // <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
+//         <div className="absolute top-full left-0 mt-2 z-50">
+//             <div
+//                 ref={ref}
+//                 className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-full max-w-sm"
+//             >
+
+//                 {/* Header */}
+//                 <div className="flex justify-between items-center mb-4 gap-2">
+
+//                     {/* Prev Button */}
+//                     <button
+//                         type="button"
+//                         onClick={prevMonth}
+//                         className="text-cyan-400 text-xl"
+//                     >
+//                         ←
+//                     </button>
+
+//                     {/* Month + Year Dropdown */}
+//                     <div className="flex items-center gap-2">
+
+//                         {/* Month Select */}
+//                         <select
+//                             value={month}
+//                             onChange={(e) => {
+//                                 const m = parseInt(e.target.value);
+//                                 if (year === sysYear && m > sysMonth) return; // prevent future month
+//                                 setMonth(m);
+//                             }}
+//                             className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
+//                         >
+//                             {monthNames.map((m, i) => (
+//                                 <option
+//                                     key={i}
+//                                     value={i}
+//                                     disabled={year === sysYear && i > sysMonth}
+//                                 >
+//                                     {m}
+//                                 </option>
+//                             ))}
+//                         </select>
+
+//                         {/* Year Select */}
+//                         <select
+//                             value={year}
+//                             onChange={(e) => {
+//                                 const newYear = parseInt(e.target.value);
+//                                 setYear(newYear);
+
+//                                 // Auto-fix month if going to current year
+//                                 if (newYear === sysYear && month > sysMonth) {
+//                                     setMonth(sysMonth);
+//                                 }
+//                             }}
+//                             className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
+//                         >
+//                             {years.map((y) => (
+//                                 <option key={y} value={y}>{y}</option>
+//                             ))}
+//                         </select>
+//                     </div>
+
+//                     {/* Next Button */}
+//                     <button
+//                         type="button"
+//                         onClick={nextMonth}
+//                         disabled={year === sysYear && month === sysMonth}
+//                         className={`text-xl ${year === sysYear && month === sysMonth
+//                             ? "text-gray-600 cursor-not-allowed"
+//                             : "text-cyan-400"
+//                             }`}
+//                     >
+//                         →
+//                     </button>
+//                 </div>
+
+//                 {/* Weekdays */}
+//                 <div className="grid grid-cols-7 text-center text-cyan-300 text-sm mb-2">
+//                     {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => <div key={d}>{d}</div>)}
+//                 </div>
+
+//                 {/* Days */}
+//                 <div className="grid grid-cols-7 gap-1 text-center">
+//                     {daysArray.map((day, idx) => {
+//                         if (!day) return <div key={idx} className="w-6 h-6 text-sm sm:w-8 sm:h-8"></div>;
+
+//                         const disabled = isDisabled(day);
+
+//                         return (
+//                             <button
+//                                 type="button"
+//                                 key={idx}
+//                                 disabled={disabled}
+//                                 onClick={() => handleSelect(day)}
+//                                 className={`flex items-center justify-center rounded-lg transition-all
+//                                         w-6 h-6 text-sm sm:w-8 sm:h-8
+//                                         ${disabled
+//                                             ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+//                                             : "bg-gray-800 hover:bg-cyan-600 hover:text-black"
+//                                         }`}
+//                             >
+//                                 {day}
+//                             </button>
+//                         );
+//                     })}
+//                 </div>
+
+//             </div>
+//         </div>
+//     );
+// }
+
+
 import { useState, useEffect, useRef } from "react";
 
 export default function DatePickerPopup({
@@ -6,8 +219,10 @@ export default function DatePickerPopup({
     onSelect,
     minDate,
     maxDate,
+    containerRef,
 }) {
     const ref = useRef(null);
+
     const today = new Date();
 
     const sysYear = today.getFullYear();
@@ -24,6 +239,46 @@ export default function DatePickerPopup({
     const [month, setMonth] = useState(today.getMonth());
     const [year, setYear] = useState(today.getFullYear());
 
+    const [position, setPosition] = useState("left");
+
+    // ------------------------------------
+    // Calculate popup position
+    // ------------------------------------
+    useEffect(() => {
+        if (!open || !containerRef?.current) return;
+
+        const calculatePosition = () => {
+            const rect = containerRef.current.getBoundingClientRect();
+
+            const popupWidth = 320;
+            const viewportWidth = window.innerWidth;
+
+            const spaceOnRight = viewportWidth - rect.left;
+            const spaceOnLeft = rect.right;
+
+            // If popup does not fit on right,
+            // align it to the right side of input
+            if (spaceOnRight < popupWidth && spaceOnLeft >= popupWidth) {
+                setPosition("right");
+            } else {
+                setPosition("left");
+            }
+        };
+
+        calculatePosition();
+
+        window.addEventListener("resize", calculatePosition);
+        window.addEventListener("scroll", calculatePosition, true);
+
+        return () => {
+            window.removeEventListener("resize", calculatePosition);
+            window.removeEventListener("scroll", calculatePosition, true);
+        };
+    }, [open, containerRef]);
+
+    // ------------------------------------
+    // Reset calendar when opened
+    // ------------------------------------
     useEffect(() => {
         if (open) {
             setMonth(today.getMonth());
@@ -31,25 +286,53 @@ export default function DatePickerPopup({
         }
     }, [open]);
 
+    // ------------------------------------
+    // Outside click
+    // ------------------------------------
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) onClose();
+            if (
+                ref.current &&
+                !ref.current.contains(e.target) &&
+                containerRef?.current &&
+                !containerRef.current.contains(e.target)
+            ) {
+                onClose();
+            }
         };
-        if (open) document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [open]);
+
+        if (open) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [open, onClose, containerRef]);
 
     if (!open) return null;
 
-    // Calendar days
+    // ------------------------------------
+    // Calendar
+    // ------------------------------------
+
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+
     const daysArray = [];
 
-    for (let i = 0; i < firstDayOfMonth; i++) daysArray.push(null);
-    for (let i = 1; i <= totalDaysInMonth; i++) daysArray.push(i);
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        daysArray.push(null);
+    }
 
+    for (let i = 1; i <= totalDaysInMonth; i++) {
+        daysArray.push(i);
+    }
+
+    // ------------------------------------
     // Month navigation
+    // ------------------------------------
+
     const prevMonth = () => {
         if (month === 0) {
             setYear(year - 1);
@@ -60,7 +343,8 @@ export default function DatePickerPopup({
     };
 
     const nextMonth = () => {
-        if (year === sysYear && month === sysMonth) return; // block future
+        if (year === sysYear && month === sysMonth) return;
+
         if (month === 11) {
             setYear(year + 1);
             setMonth(0);
@@ -70,41 +354,69 @@ export default function DatePickerPopup({
     };
 
     const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ];
 
     const isDisabled = (day) => {
         if (!day) return true;
+
         const date = new Date(year, month, day);
+
         if (min && date < min) return true;
         if (max && date > max) return true;
+
         return false;
     };
 
     const handleSelect = (day) => {
         if (!day || isDisabled(day)) return;
+
         const selectedDate = new Date(year, month, day);
+
         onSelect(selectedDate);
         onClose();
     };
 
-    // Generate Year Range (1950 → current year)
+    // ------------------------------------
+    // Years
+    // ------------------------------------
+
     const years = [];
-    for (let y = 1950; y <= sysYear; y++) years.push(y);
+
+    for (let y = 1950; y <= sysYear; y++) {
+        years.push(y);
+    }
+
+    // ------------------------------------
+    // Popup
+    // ------------------------------------
 
     return (
-        // <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
-        <div className="absolute top-full left-0 mt-2 z-50">
+        <div
+            className={`absolute top-full mt-2 z-50 ${
+                position === "right"
+                    ? "right-0"
+                    : "left-0"
+            }`}
+        >
             <div
                 ref={ref}
-                className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-full max-w-sm"
+                className="bg-gray-900 border border-cyan-500/40 p-4 rounded-2xl shadow-2xl w-[320px] max-w-[calc(100vw-1rem)]"
             >
-
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4 gap-2">
 
-                    {/* Prev Button */}
                     <button
                         type="button"
                         onClick={prevMonth}
@@ -113,15 +425,20 @@ export default function DatePickerPopup({
                         ←
                     </button>
 
-                    {/* Month + Year Dropdown */}
                     <div className="flex items-center gap-2">
 
-                        {/* Month Select */}
                         <select
                             value={month}
                             onChange={(e) => {
                                 const m = parseInt(e.target.value);
-                                if (year === sysYear && m > sysMonth) return; // prevent future month
+
+                                if (
+                                    year === sysYear &&
+                                    m > sysMonth
+                                ) {
+                                    return;
+                                }
+
                                 setMonth(m);
                             }}
                             className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
@@ -130,42 +447,55 @@ export default function DatePickerPopup({
                                 <option
                                     key={i}
                                     value={i}
-                                    disabled={year === sysYear && i > sysMonth}
+                                    disabled={
+                                        year === sysYear &&
+                                        i > sysMonth
+                                    }
                                 >
                                     {m}
                                 </option>
                             ))}
                         </select>
 
-                        {/* Year Select */}
                         <select
                             value={year}
                             onChange={(e) => {
-                                const newYear = parseInt(e.target.value);
+                                const newYear = parseInt(
+                                    e.target.value
+                                );
+
                                 setYear(newYear);
 
-                                // Auto-fix month if going to current year
-                                if (newYear === sysYear && month > sysMonth) {
+                                if (
+                                    newYear === sysYear &&
+                                    month > sysMonth
+                                ) {
                                     setMonth(sysMonth);
                                 }
                             }}
                             className="bg-gray-800 text-cyan-300 px-2 py-1 rounded-md border border-cyan-600/40 text-xs lg:text-lg"
                         >
                             {years.map((y) => (
-                                <option key={y} value={y}>{y}</option>
+                                <option key={y} value={y}>
+                                    {y}
+                                </option>
                             ))}
                         </select>
                     </div>
 
-                    {/* Next Button */}
                     <button
                         type="button"
                         onClick={nextMonth}
-                        disabled={year === sysYear && month === sysMonth}
-                        className={`text-xl ${year === sysYear && month === sysMonth
-                            ? "text-gray-600 cursor-not-allowed"
-                            : "text-cyan-400"
-                            }`}
+                        disabled={
+                            year === sysYear &&
+                            month === sysMonth
+                        }
+                        className={`text-xl ${
+                            year === sysYear &&
+                            month === sysMonth
+                                ? "text-gray-600 cursor-not-allowed"
+                                : "text-cyan-400"
+                        }`}
                     >
                         →
                     </button>
@@ -173,13 +503,24 @@ export default function DatePickerPopup({
 
                 {/* Weekdays */}
                 <div className="grid grid-cols-7 text-center text-cyan-300 text-sm mb-2">
-                    {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(d => <div key={d}>{d}</div>)}
+                    {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(
+                        (d) => (
+                            <div key={d}>{d}</div>
+                        )
+                    )}
                 </div>
 
                 {/* Days */}
                 <div className="grid grid-cols-7 gap-1 text-center">
                     {daysArray.map((day, idx) => {
-                        if (!day) return <div key={idx} className="w-6 h-6 text-sm sm:w-8 sm:h-8"></div>;
+                        if (!day) {
+                            return (
+                                <div
+                                    key={idx}
+                                    className="w-6 h-6 text-sm sm:w-8 sm:h-8"
+                                />
+                            );
+                        }
 
                         const disabled = isDisabled(day);
 
@@ -190,18 +531,18 @@ export default function DatePickerPopup({
                                 disabled={disabled}
                                 onClick={() => handleSelect(day)}
                                 className={`flex items-center justify-center rounded-lg transition-all
-                                        w-6 h-6 text-sm sm:w-8 sm:h-8
-                                        ${disabled
+                                    w-6 h-6 text-sm sm:w-8 sm:h-8
+                                    ${
+                                        disabled
                                             ? "bg-gray-700 text-gray-500 cursor-not-allowed"
                                             : "bg-gray-800 hover:bg-cyan-600 hover:text-black"
-                                        }`}
+                                    }`}
                             >
                                 {day}
                             </button>
                         );
                     })}
                 </div>
-
             </div>
         </div>
     );

@@ -530,6 +530,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
                         value={localPassword}
                         onChange={(e) => setLocalPassword(e.target.value)}
                         className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-12 text-white"
+                        placeholder="At least 5 digit like 'Ab34@56'"
                     />
                     <button
                         type="button"

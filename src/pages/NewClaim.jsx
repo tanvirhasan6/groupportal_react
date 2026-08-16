@@ -18,7 +18,7 @@ const ClaimForm = () => {
     return (
         <div className="w-full text-white flex justify-center items-start p-2">
 
-            {warning ? (
+            {user?.GROUP_CODE === "0" && warning ? (
                 <div className="w-full max-w-3xl mx-auto mt-6">
                     <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 backdrop-blur-xl shadow-2xl overflow-hidden">
                         <div className="flex items-start gap-4 p-6">

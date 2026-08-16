@@ -8,10 +8,13 @@ import ClaimDetails from "./pages/ClaimDetails";
 import Manage from "./pages/Manage";
 import Missing from "./pages/Missing";
 import Swal from "sweetalert2"
+
 import DirectLogin from "./pages/DirectLogin"
+
 const Login = lazy(() => import("./pages/Login"));
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const AllClaims = lazy(() => import("./pages/AllClaim"));
 const ProfilePage = lazy(() => import("./pages/Profile"));
 const ClaimsPage = lazy(() => import("./pages/NewClaim"));
 const FaqPage = lazy(() => import("./pages/Faq"));
@@ -188,6 +191,7 @@ export default function App() {
             >
 
               <Route index element={<DashboardPage />} />
+              <Route path="allClaims" element={<AllClaims />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="newclaim" element={<ClaimsPage />} />
 

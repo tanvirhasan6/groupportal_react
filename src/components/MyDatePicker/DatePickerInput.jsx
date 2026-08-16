@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import DatePickerPopup from "./DatePickerPopup";
 
 export default function DatePickerInput({
@@ -10,9 +10,10 @@ export default function DatePickerInput({
   disabled,
 }) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
 
   return (
-    <div className="w-full relative">
+    <div ref={containerRef} className="w-full relative">
       {label && <label className="block text-sm mb-1 text-gray-300">{label}</label>}
 
       <input
@@ -36,6 +37,7 @@ export default function DatePickerInput({
         }}
         minDate={minDate}
         maxDate={maxDate}
+        containerRef={containerRef}
       />
     </div>
   );

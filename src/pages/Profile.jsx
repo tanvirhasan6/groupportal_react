@@ -12,8 +12,8 @@ import ChangePassword from "../components/ProfileComponent/ChangePassword"
 const ProfilePage = () => {
 
     const user = useUser()
-    const userid = user?.USERNAME       
-    const policyno = user?.POLICY_NO 
+    const userid = user?.USERNAME
+    const policyno = user?.POLICY_NO
 
     const [activePanel, setActivePanel] = useState(null)
     const [accountData, setAccountData] = useState(null)
@@ -102,7 +102,7 @@ const ProfilePage = () => {
 
             try {
                 data = JSON.parse(text)
-                toast.success( data?.message)
+                toast.success(data?.message)
             } catch {
                 toast.error("Upload failed");
                 return
@@ -152,8 +152,14 @@ const ProfilePage = () => {
 
                         <div>
                             <h2 className="text-lg font-semibold">{user?.NAME}</h2>
-                            <p>Dept: {user?.DEPT_NAME}</p>
-                            <p>Faculty: {user?.FACULTY}</p>
+                            {
+                                user?.GROUP_CODE == 0 &&
+
+                                <>
+                                    <p>Dept: {user?.DEPT_NAME}</p>
+                                    <p>Faculty: {user?.FACULTY}</p>
+                                </>
+                            }
                             <p>ID: {user?.USERNAME}</p>
                         </div>
                     </div>
@@ -165,23 +171,29 @@ const ProfilePage = () => {
                         {/* GRID START */}
                         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            <InputBox
-                                label="Account No"
-                                value={accountData?.ACCNO}
-                                onClick={() => togglePanel("bank")}
-                            />
+                            {
+                                user?.GROUP_CODE == 0 &&
+                                <>
+                                    <InputBox
+                                        label="Account No"
+                                        value={accountData?.ACCNO}
+                                        onClick={() => togglePanel("bank")}
+                                    />
 
-                            <InputBox
-                                label="Bank"
-                                value={accountData?.BANKNAME}
-                                onClick={() => togglePanel("bank")}
-                            />
+                                    <InputBox
+                                        label="Bank"
+                                        value={accountData?.BANKNAME}
+                                        onClick={() => togglePanel("bank")}
+                                    />
 
-                            <InputBox
-                                label="Branch"
-                                value={accountData?.BRANCHNAME}
-                                onClick={() => togglePanel("bank")}
-                            />
+                                    <InputBox
+                                        label="Branch"
+                                        value={accountData?.BRANCHNAME}
+                                        onClick={() => togglePanel("bank")}
+                                    />
+                                </>
+                            }
+
 
                             <InputBox
                                 label="Mobile"

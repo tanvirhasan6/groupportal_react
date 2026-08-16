@@ -163,9 +163,9 @@ export default function ClaimSummary() {
                 // Set first page initially
                 setClaimSummaryData(finalData.slice(0, itemsPerPage));
             }
-            else {
-                toast.error(data?.message)
-            }
+            // else {
+            //     toast.error(data?.message)
+            // }
 
         } catch (error) {
             toast.error(error)
