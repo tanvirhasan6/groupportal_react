@@ -9,55 +9,8 @@ function FileInput({
     files = [],
     setFiles,
     existingFiles = [],
+    allFiles = [],
 }) {
-
-    // const handleFileChange = async (e) => {
-    //     if (!e.target.files) return;
-
-    //     const selectedFiles = Array.from(e.target.files);
-
-    //     try {
-
-    //         toast.loading("Compressing images...", { id: "compress" });
-
-    //         const compressedFiles = await Promise.all(
-    //             selectedFiles.map(file => compressImage(file, 500))
-    //         );
-
-    //         toast.dismiss("compress");
-
-    //         const filtered = compressedFiles.filter(file => {
-    //             const name = file.name.trim();
-
-    //             if (existingFiles.includes(name)) {
-    //                 toast.error(`"${name}" is already uploaded earlier.`);
-    //                 return false;
-    //             }
-
-    //             if (
-    //                 files.some(
-    //                     f =>
-    //                         f.name === file.name &&
-    //                         f.size === file.size &&
-    //                         f.lastModified === file.lastModified
-    //                 )
-    //             ) {
-    //                 toast.error(`"${name}" is already selected.`);
-    //                 return false;
-    //             }
-
-    //             return true;
-    //         });
-
-    //         setFiles(prev => [...prev, ...filtered]);
-
-    //     } catch (err) {
-    //         toast.error("Image compression failed.");
-    //         console.error(err);
-    //     } finally {
-    //         e.target.value = "";
-    //     }
-    // };
 
     const handleFileChange = async (e) => {
         if (!e.target.files) return;
