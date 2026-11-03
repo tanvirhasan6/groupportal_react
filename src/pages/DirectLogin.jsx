@@ -69,10 +69,14 @@ export default function DirectLogin({ onLogin }) {
 
                     if (data.status === 200) {
 
-                        await onLogin();
+                        const authenticated = await onLogin();
 
-                        // Navigate
-                        navigate("/dashboard", { replace: true });
+                        if (authenticated) {
+                            navigate("/dashboard", { replace: true });
+                        } else {
+                            toast.error("Unable to start your session. Please sign in again.");
+                            navigate("/login", { replace: true });
+                        }
 
                         return;
                     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useUser } from "../context/UserContext"
 import { useLocation, useNavigate } from 'react-router-dom'
 import toast from "react-hot-toast"
@@ -99,16 +99,7 @@ function FileInput({
                 type="file"
                 multiple
                 onChange={handleFileChange}
-                className=" w-full
-                         file:bg-cyan-600
-                           file:hover:bg-cyan-700
-                           file:border-0
-                           file:rounded-md
-                           file:px-4
-                           file:py-1
-                           file:text-white
-                           text-gray-400
-                           text-sm"
+                className="w-full file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
             />
 
             <ul className="mt-3 space-y-2">
@@ -141,6 +132,7 @@ export default function ClaimDetails() {
 
     const { state } = useLocation()
     const navigate = useNavigate()
+    const canUploadDocuments = String(user?.GROUP_CODE) === '0'
     const [intno, setIntno] = useState()
     const [detailData, setDetailData] = useState({})
     const [working, setWorking] = useState(false)
@@ -162,7 +154,7 @@ export default function ClaimDetails() {
 
     const baseURL = "http://localhost/web_docs/"
 
-    const getDetails = async (i) => {
+    const getDetails = useCallback(async (i) => {
 
         setWorking(true)
 
@@ -194,18 +186,17 @@ export default function ClaimDetails() {
         } finally {
             setWorking(false)
         }
-    }
+    }, [])
 
     useEffect(() => {
+        const requestedIntno = state?.intno ?? state?.claim?.INTNO ?? sessionStorage.getItem("intno")
 
-        const getIntno = sessionStorage.getItem("intno")
-
-        if (getIntno) {
-            setIntno(getIntno)
-            getDetails(getIntno)
+        if (requestedIntno) {
+            setIntno(requestedIntno)
+            getDetails(requestedIntno)
         }
 
-    }, [])
+    }, [getDetails, state?.intno, state?.claim?.INTNO])
 
     const downloadReceiptPdf = async () => {
         setWorking(true)
@@ -372,9 +363,14 @@ export default function ClaimDetails() {
     }
 
     const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        if (!canUploadDocuments) {
+            toast.error("You do not have permission to upload claim documents.")
+            return
+        }
 
         setWorking(true)
-        e.preventDefault()
 
         if (allSelectedFiles.length === 0) {
             toast.error("Please attach at least one document before submitting.")
@@ -453,7 +449,7 @@ export default function ClaimDetails() {
 
                     <div className='w-full'>
 
-                        {user?.GROUP_CODE === '0' && basicData.STATUS === 8 && (
+                        {canUploadDocuments && basicData.STATUS === 8 && (
                             <div className='w-full mb-5'>
 
                                 {/* Additional Document Description */}

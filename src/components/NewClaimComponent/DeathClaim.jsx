@@ -6,63 +6,39 @@ import { useUser } from "../../context/UserContext"
 import { useNavigate } from "react-router-dom"
 import compressImage from "../../utilities/ImageCompressor"
 
-function FileInput({
-    label,
-    files = [],
-    setFiles,
-    allFiles = [],
-}) {
-
-    // const handleFileChange = async (e) => {
-    //     const selectedFiles = Array.from(e.target.files);
-
-    //     try {
-
-    //         const newFiles = selectedFiles.filter(
-    //             file =>
-    //                 !files.some(
-    //                     f =>
-    //                         f.name === file.name &&
-    //                         f.size === file.size &&
-    //                         f.lastModified === file.lastModified
-    //                 )
-    //         );
-
-    //         if (newFiles.length === 0) {
-    //             toast.error("This image has already been selected.");
-    //             return;
-    //         }
-
-    //         // If some files are duplicates
-    //         if (newFiles.length < selectedFiles.length) {
-    //             toast.error("Duplicate image(s) skipped.");
-    //         }
-
-    //         toast.loading("Compressing images...", { id: "compress" });
-
-    //         const compressedFiles = await Promise.all(
-    //             selectedFiles.map(file => compressImage(file, 500))
-    //         );
-
-    //         console.log(compressedFiles);
-
-    //         toast.dismiss("compress");
-    //         // Prevent duplicate files
-
-    //         setFiles(prev => [...prev, ...newFiles]);
-
-    //     } catch (err) {
-    //         toast.error("Image compression failed.");
-    //         console.error(err);
-    //     } finally {
-    //         e.target.value = "";
-    //     }
-    // };
+function FileInput({ label, files = [], setFiles, allFiles = [], }) {
 
     const handleFileChange = async (e) => {
         if (!e.target.files) return;
 
         const selectedFiles = Array.from(e.target.files);
+
+        // Allow JPG/JPEG only
+        const invalidFiles = selectedFiles.filter(file => {
+            const extension = file.name.split(".").pop()?.toLowerCase();
+            return extension !== "jpg" && extension !== "jpeg";
+        });
+
+        if (invalidFiles.length > 0) {
+            invalidFiles.forEach(file => {
+                toast.error(`"${file.name}" is not a JPG/JPEG image.`);
+            });
+
+            // Keep only valid JPG/JPEG files
+            const validFiles = selectedFiles.filter(file => {
+                const extension = file.name.split(".").pop()?.toLowerCase();
+                return extension === "jpg" || extension === "jpeg";
+            });
+
+            if (validFiles.length === 0) {
+                e.target.value = "";
+                return;
+            }
+
+            // Continue processing only valid files
+            selectedFiles.length = 0;
+            selectedFiles.push(...validFiles);
+        }
 
         try {
             // Check filename against ALL file inputs
@@ -129,8 +105,9 @@ function FileInput({
             <input
                 type="file"
                 multiple
+                accept=".jpg,.jpeg,image/jpeg"
                 onChange={handleFileChange}
-                className="w-full file:bg-cyan-600
+                className="block w-full min-w-0 max-w-full file:bg-cyan-600
                            file:hover:bg-cyan-700
                            file:border-0
                            file:rounded-md
@@ -198,11 +175,11 @@ export default function DeathClaim() {
         coverage: "",
         deathDate: "",
         claimType: "",
-        death: "",
+        death: "1",
         deathName: "",
         deathPlace: "",
         deathPlaceName: "",
-        hospital: "",
+        hospital: "1",
         hospitalName: "",
         amount: "",
         maxlimit: 0,
@@ -279,75 +256,6 @@ export default function DeathClaim() {
 
         setFormData((prev) => ({ ...prev, [name]: value }));
     }
-
-    // const FileInput = ({ label, files, setFiles }) => {
-    //     const handleFileChange = async(e) => {
-
-    //         if (!e.target.files) return;
-
-    //         const newFiles = Array.from(e.target.files).filter(
-    //             (file) => !allSelectedFiles.some((f) => f.name === file.name)
-    //         );
-    //         setFiles([...files, ...newFiles]);
-
-    //         // const selectedFiles = Array.from(e.target.files).filter(
-    //         //     file => !allSelectedFiles.some(f => f.name === file.name)
-    //         // );
-
-    //         // const processedFiles = await Promise.all(
-
-    //         //     selectedFiles.map(async file => {
-
-    //         //         if (file.type.startsWith("image/")) {
-    //         //             const compressed = await compressImage(file, 500);
-    //         //             return compressed;
-    //         //         }
-
-    //         //         return file;
-    //         //     })
-
-    //         // );
-
-    //         // setFiles(prev => [...prev, ...processedFiles]);
-
-    //         e.target.value = "";
-    //     };
-
-    //     const removeFile = (fileName) => {
-    //         setFiles(files.filter((f) => f.name !== fileName));
-    //     };
-
-    //     return (
-    //         <div className="border border-white/20 rounded-xl p-4 bg-gray-900/40 hover:bg-gray-900/60 transition">
-    //             <label className="block text-sm mb-2 text-gray-300">{label}</label>
-
-    //             <input
-    //                 type="file"
-    //                 multiple
-    //                 onChange={handleFileChange}
-    //                 className="file:bg-cyan-600 file:hover:bg-cyan-700 file:border-0 file:rounded-md file:px-4 file:py-1 file:text-white text-gray-400 text-sm"
-    //             />
-
-    //             <ul className="mt-2">
-    //                 {files.map((file) => (
-    //                     <li
-    //                         key={file.name}
-    //                         className="flex justify-between items-center mt-1 bg-gray-800 p-2 rounded"
-    //                     >
-    //                         <span>{file.name}</span>
-    //                         <button
-    //                             type="button"
-    //                             onClick={() => removeFile(file.name)}
-    //                             className="text-red-500 hover:text-red-700 font-bold"
-    //                         >
-    //                             ✕
-    //                         </button>
-    //                     </li>
-    //                 ))}
-    //             </ul>
-    //         </div>
-    //     );
-    // }
 
     const getBeneficiaryData = async (i) => {
 
@@ -487,7 +395,7 @@ export default function DeathClaim() {
                     },
                     credentials: "include",
                     body: JSON.stringify({
-                        username: user?.USERNAME,
+                        username: formData.idno,
                         policyno: user?.POLICY_NO,
                         claimType: formData.claimType,
                         coverage: formData.coverage,
@@ -522,7 +430,7 @@ export default function DeathClaim() {
                 submissionData.set("ratio", res.BENEFIT_RATIO)
                 submissionData.set("expHead", res.EXP_HEAD)
                 submissionData.set("riskFrom", res.RISK_FROM)
-                submissionData.set("username", user?.USERNAME);
+                submissionData.set("username", formData.idno);
                 submissionData.set("policyno", user?.POLICY_NO);
 
                 prescriptionFiles.forEach(file => submissionData.append("prescriptionFiles", file))
@@ -555,22 +463,31 @@ export default function DeathClaim() {
 
                         data = JSON.parse(text)
                         console.log(data);
-                        toast.success('Claim Successfull')
 
-                        setTimeout(() => {
-                            navigate("/dashboard", { replace: true });
-                            return;
-                        }, 1000);
+                        if (data?.success) {
+                            toast.success('Claim Successfull')
+
+                            setTimeout(() => {
+                                navigate("/dashboard", { replace: true });
+                                return;
+                            }, 1000);
+                        } else {
+                            toast.error(`${data?.message}`)
+                        }
 
 
                     } catch {
                         console.error("Invalid JSON:", text)
                         setLoading(false)
                         return
+                    } finally {
+                        setLoading(false)
                     }
 
                 } catch (err) {
                     toast.error(`Upload failed: ${err}`)
+                    setLoading(false)
+                } finally {
                     setLoading(false)
                 }
 
@@ -582,22 +499,24 @@ export default function DeathClaim() {
         } catch (error) {
             toast.error(`${error}`)
             setLoading(false)
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
 
-        <div className="w-full">
+        <div className="w-full min-w-0">
 
             {/* <Toaster /> */}
 
-            <form onSubmit={handleFormSubmit} className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 sm:p-8 space-y-8">
+            <form onSubmit={handleFormSubmit} className="w-full min-w-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 sm:p-8 space-y-8">
 
                 <h1 className="text-center text-3xl font-semibold text-cyan-400">Death Claim</h1>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 
-                    <div className='col-span-4 md:col-span-2'>
+                    <div className='min-w-0'>
                         <label className="block text-sm mb-1 text-gray-300">Beneficiary ID</label>
                         <input
                             type="text"
@@ -605,7 +524,7 @@ export default function DeathClaim() {
                             placeholder={`Enter Beneficiary ID Number`}
                             value={formData.idno}
                             onChange={handleChange}
-                            className="w-full sm:w-96 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            className="w-full min-w-0 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                             autoComplete="off"
                         // disabled={!formData.claimType}
                         />
@@ -614,23 +533,23 @@ export default function DeathClaim() {
                     {
                         beneficiary?.NAME &&
                         <>
-                            <div className='col-span-4 md:col-span-2'>
+                            <div className='min-w-0'>
                                 <label className="block text-sm mb-1 text-gray-300">Name</label>
                                 <input
                                     type="text"
                                     name="name"
                                     value={beneficiary.NAME}
-                                    className="w-full sm:w-96 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    className="w-full min-w-0 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                                     disabled={true}
                                 />
                             </div>
-                            <div className='col-span-4 md:col-span-2'>
+                            <div className='min-w-0'>
                                 <label className="block text-sm mb-1 text-gray-300">Department</label>
                                 <input
                                     type="text"
                                     name="name"
                                     value={beneficiary.DEPT_NAME}
-                                    className="w-full sm:w-96 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    className="w-full min-w-0 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                                     disabled={true}
                                 />
                             </div>
@@ -644,9 +563,9 @@ export default function DeathClaim() {
 
                     <>
 
-                        <div className="grid md:grid-cols-12 gap-6">
+                        <div className="grid w-full min-w-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-end gap-4 sm:gap-6">
 
-                            <div className='col-span-4'>
+                            <div className='min-w-0'>
                                 <label className="block text-sm mb-1 text-gray-300">Coverage Period</label>
                                 <select
                                     name="coverage"
@@ -661,7 +580,7 @@ export default function DeathClaim() {
                                 </select>
                             </div>
 
-                            <div className='col-span-4'>
+                            <div className='min-w-0'>
                                 <label className="block text-sm mb-1 text-gray-300">Claim Type</label>
                                 <select
                                     name="claimType"
@@ -677,21 +596,22 @@ export default function DeathClaim() {
                                 </select>
                             </div>
 
-                            <div className='col-span-4 md:col-span-2'>
+                            <div className='min-w-0'>
                                 <label className="block text-sm mb-1 text-gray-300">Amount</label>
                                 <input
                                     type="number"
                                     name="amount"
-                                    placeholder={`Enter Amount ${selectedBenefit?.AMOUNT_LIMIT ? `1 - ${selectedBenefit.AMOUNT_LIMIT}` : ''}`}
-                                    value={formData.amount}
-                                    onChange={handleChange}
+                                    placeholder={`Enter Amount ${selectedBenefit?.AMOUNT_LIMIT ? `1 - ${selectedBenefit?.AMOUNT_LIMIT}` : ''}`}
+                                    value={selectedBenefit?.AMOUNT_LIMIT}
+                                    // onChange={handleChange}
                                     className="w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                    disabled={!formData.claimType}
+                                    disabled={true}
                                 />
                             </div>
 
-                            <div className='col-span-4'>
-                                <SearchableSelect
+                            <div className='min-w-0'>
+                                <label className="block text-sm mb-1 text-gray-300">Death Reason</label>
+                                {/* <SearchableSelect
                                     label="Death Reason"
                                     options={deathListData}
                                     value={formData.death}
@@ -708,23 +628,24 @@ export default function DeathClaim() {
                                     placeholder="Select Reason"
                                     disabled={!formData.coverage}
                                     onFocus={(e) => e.target.select()}
-                                />
+                                /> */}
 
-                                {formData.death === 1 && (
-                                    <input
-                                        type="text"
-                                        name="deathName"
-                                        value={formData.deathName}
-                                        onChange={handleChange}
-                                        placeholder="Enter Other Disease"
-                                        className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
-                                    />
-                                )}
+                                {/* {formData.death === 1 && ( */}
+                                <input
+                                    type="text"
+                                    name="deathName"
+                                    value={formData.deathName}
+                                    onChange={handleChange}
+                                    placeholder="Enter Death Reason"
+                                    className="w-full min-w-0 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                                />
+                                {/* )} */}
 
                             </div>
 
-                            <div className='col-span-4'>
-                                <SearchableSelect
+                            <div className='min-w-0'>
+                                <label className="block text-sm mb-1 text-gray-300">Place</label>
+                                {/* <SearchableSelect
                                     label="Place of Death"
                                     options={deathPlaceListData}
                                     value={formData.death}
@@ -741,44 +662,36 @@ export default function DeathClaim() {
                                     placeholder="Select Place"
                                     disabled={!formData.coverage}
                                     onFocus={(e) => e.target.select()}
-                                />
+                                /> */}
 
-                                {formData.deathPlace === 1 && (
-                                    <input
-                                        type="text"
-                                        name="deathPlaceName"
-                                        value={formData.deathPlaceName}
-                                        onChange={handleChange}
-                                        placeholder="Enter Other Disease"
-                                        className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
-                                    />
-                                )}
+                                {/* {formData.deathPlace === 1 && ( */}
+                                <input
+                                    type="text"
+                                    name="deathPlaceName"
+                                    value={formData.deathPlaceName}
+                                    onChange={handleChange}
+                                    placeholder="Enter Place of Death"
+                                    className="w-full min-w-0 bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                                />
+                                {/* )} */}
 
                             </div>
 
-                            <DatePickerInput
-                                name="deathDate"
-                                label="Date of Death"
-                                value={formData.deathDate}
-                                onChange={(val) => setFormData(prev => ({ ...prev, deathDate: val }))}
-                                maxDate={new Date()}
-                                // minDate={minConsultDate}
-                                disabled={!formData.coverage || !formData.claimType}
-                            />
-
+                            <div className='min-w-0'>
+                                <DatePickerInput
+                                    name="deathDate"
+                                    label="Date of Death"
+                                    value={formData.deathDate}
+                                    onChange={(val) => setFormData(prev => ({ ...prev, deathDate: val }))}
+                                    maxDate={new Date()}
+                                    // minDate={minConsultDate}
+                                    disabled={!formData.coverage || !formData.claimType}
+                                />
+                            </div>
 
                         </div>
 
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div className="min-w-0">
-                                <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} allFiles={allSelectedFiles} />
-                            </div>
-                            <div className="min-w-0">
-                                <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} allFiles={allSelectedFiles} />
-                            </div>
-                            <div className="min-w-0">
-                                <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} allFiles={allSelectedFiles} />
-                            </div>
+                        <div className="grid w-full min-w-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             <div className="min-w-0">
                                 <FileInput label="Death Certificate-City Corporation/UP/Commissioner" files={cityCorporationFiles} setFiles={setCityCorporationFiles} allFiles={allSelectedFiles} />
                             </div>
@@ -787,6 +700,15 @@ export default function DeathClaim() {
                             </div>
                             <div className="min-w-0">
                                 <FileInput label="Death Certificate-From You" files={policyHolderFiles} setFiles={setPolicyHolderFiles} allFiles={allSelectedFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Prescription Files" files={prescriptionFiles} setFiles={setPrescriptionFiles} allFiles={allSelectedFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Medical Test Files" files={testFiles} setFiles={setTestFiles} allFiles={allSelectedFiles} />
+                            </div>
+                            <div className="min-w-0">
+                                <FileInput label="Age Proof Files" files={idFiles} setFiles={setIdFiles} allFiles={allSelectedFiles} />
                             </div>
                             <div className="min-w-0">
                                 <FileInput label="Post Mortem/Waiver Files" files={postMortemFiles} setFiles={setPostMortemFiles} allFiles={allSelectedFiles} />

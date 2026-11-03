@@ -163,7 +163,7 @@ function LogIn({ onForgot, onPassword, onSuccess, }) {
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-300">Id/Code</label>
+                    <label className="text-sm text-gray-300">Id/Mobile</label>
                     <input
                         type="text"
                         placeholder="Enter your userid or mobile"
@@ -385,7 +385,6 @@ function ForgotPassword({ onBack, onNext }) {
 // -------------------------------------------------------------------
 
 function OTPInput({ onBack, password, userData }) {
-    const navigate = useNavigate();
     const [otp, setOtp] = useState(Array(8).fill(""));
     const [alert, setAlert] = useState("");
     const [loading, setLoading] = useState(false);
@@ -417,7 +416,10 @@ function OTPInput({ onBack, password, userData }) {
 
             const data = await res.json();
 
-            if (data?.status === 200) navigate("/dashboard");
+            if (data?.status === 200) {
+                toast.success("Password updated. Please sign in with your new password.");
+                onBack();
+            }
             else setAlert(data.message || "OTP verification failed");
         } catch {
             setAlert("Something went wrong");
@@ -506,7 +508,7 @@ function SetPassword({ userData, onBack, onNext, setPassword }) {
 
             const data = await res.json();
             console.log(data);
-            
+
             if (data?.status === 200) {
                 setPassword(localPassword);
                 onNext();
@@ -626,10 +628,11 @@ function PasswordLogin({ userData, onBack, onLogin }) {
 
             if (data.status === 200) {
 
-                await onLogin();
+                const authenticated = await onLogin();
 
-                // Navigate
-                navigate("/dashboard", { replace: true });
+                if (authenticated) {
+                    navigate("/dashboard", { replace: true });
+                }
 
                 return;
             }

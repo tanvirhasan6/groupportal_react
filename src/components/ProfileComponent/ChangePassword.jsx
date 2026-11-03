@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useUser } from "../../context/UserContext"; // <-- adjust import based on your project
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 
 const ChangePassword = () => {
 
@@ -11,7 +13,13 @@ const ChangePassword = () => {
     const [newPassword, setNewPassword] = useState('');
     const [tryCount, setTryCount] = useState(0);
 
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+
     const handlePasswordUpdate = async () => {
+
+        console.log(user);
+
 
         if (user?.PASSWORD !== oldPassword) {
             const nextTry = tryCount + 1;
@@ -76,6 +84,7 @@ const ChangePassword = () => {
             const data = await res.json();
 
             if (data?.status === 200) {
+                // localStorage.removeItem("loggedin");
                 window.location.href = "/login"; // React alternative to router.replace
             }
 
@@ -91,25 +100,45 @@ const ChangePassword = () => {
             {/* <Toaster position="top-center" /> */}
 
             <div className='w-full flex flex-col sm:flex-row gap-2 items-center justify-center'>
-                <input
-                    id="oldPassword"
-                    type="password"
-                    placeholder="Enter Old Password"
-                    className="w-96 border-0 border-b border-gray-500 bg-transparent focus:border-cyan-200 
-                    focus:ring-0 focus:outline-none placeholder-gray-400 text-white"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                />
+                <div className='w-full flex flex-col sm:flex-row gap-4 items-center justify-center'>
+                    <div className="relative w-96">
+                        <input
+                            id="oldPassword"
+                            type={showOldPassword ? "text" : "password"}
+                            placeholder="Enter Old Password"
+                            className="w-full border-0 border-b border-gray-500 bg-transparent focus:border-cyan-200 focus:ring-0 focus:outline-none placeholder-gray-400 text-white pr-10"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                        />
 
-                <input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Enter New Password"
-                    className="w-96 border-0 border-b border-gray-500 bg-transparent focus:border-cyan-200 
-                    focus:ring-0 focus:outline-none placeholder-gray-400 text-white"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
+                        <button
+                            type="button"
+                            onClick={() => setShowOldPassword(!showOldPassword)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-200 focus:outline-none"
+                        >
+                            {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                    </div>
+
+                    <div className="relative w-96">
+                        <input
+                            id="newPassword"
+                            type={showNewPassword ? "text" : "password"}
+                            placeholder="Enter New Password"
+                            className="w-full border-0 border-b border-gray-500 bg-transparent focus:border-cyan-200 focus:ring-0 focus:outline-none placeholder-gray-400 text-white pr-10"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-200 focus:outline-none"
+                        >
+                            {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="flex justify-between">

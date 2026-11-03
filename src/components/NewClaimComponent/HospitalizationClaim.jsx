@@ -18,6 +18,33 @@ function FileInput({
 
         const selectedFiles = Array.from(e.target.files);
 
+        // Allow JPG/JPEG only
+        const invalidFiles = selectedFiles.filter(file => {
+            const extension = file.name.split(".").pop()?.toLowerCase();
+            return extension !== "jpg" && extension !== "jpeg";
+        });
+
+        if (invalidFiles.length > 0) {
+            invalidFiles.forEach(file => {
+                toast.error(`"${file.name}" is not a JPG/JPEG image.`);
+            });
+
+            // Keep only valid JPG/JPEG files
+            const validFiles = selectedFiles.filter(file => {
+                const extension = file.name.split(".").pop()?.toLowerCase();
+                return extension === "jpg" || extension === "jpeg";
+            });
+
+            if (validFiles.length === 0) {
+                e.target.value = "";
+                return;
+            }
+
+            // Continue processing only valid files
+            selectedFiles.length = 0;
+            selectedFiles.push(...validFiles);
+        }
+
         try {
             // Check filename against ALL file inputs
             const newFiles = selectedFiles.filter((file, index, arr) => {
@@ -83,6 +110,7 @@ function FileInput({
             <input
                 type="file"
                 multiple
+                accept=".jpg,.jpeg,image/jpeg"
                 onChange={handleFileChange}
                 className="w-full file:bg-cyan-600
                            file:hover:bg-cyan-700
@@ -140,9 +168,9 @@ const HospitalizationClaim = () => {
         admissionDate: "",
         dischargeDate: "",
         claimType: "",
-        disease: "",
+        disease: "1",
         diseaseName: "",
-        hospital: "",
+        hospital: "1",
         hospitalName: "",
         amount: "",
         maxlimit: 0,
@@ -513,12 +541,17 @@ const HospitalizationClaim = () => {
 
                         data = JSON.parse(text)
                         console.log(data);
-                        toast.success('Claim Successfull')
 
-                        setTimeout(() => {
-                            navigate("/dashboard", { replace: true });
-                            return;
-                        }, 1000);
+                        if (data?.success) {
+                            toast.success('Claim Successfull')
+
+                            setTimeout(() => {
+                                navigate("/dashboard", { replace: true });
+                                return;
+                            }, 1000);
+                        } else {
+                            toast.error(`${data?.message}`)
+                        }
 
 
                     } catch {
@@ -631,7 +664,8 @@ const HospitalizationClaim = () => {
                     </div>
 
                     <div className='col-span-4 md:col-span-5'>
-                        <SearchableSelect
+                        <label className="block text-sm mb-1 text-gray-300">Desease</label>
+                        {/* <SearchableSelect
                             label="Disease"
                             options={diseasesData}
                             value={formData.disease}
@@ -649,26 +683,27 @@ const HospitalizationClaim = () => {
                             placeholder="Select Disease"
                             disabled={false}
                             onFocus={(e) => e.target.select()}
-                        />
+                        /> */}
 
-                        {formData.disease === 1 && (
-                            <input
-                                type="text"
-                                name="diseaseName"
-                                value={formData.diseaseName}
-                                onChange={handleChange}
-                                placeholder="Enter Other Disease"
-                                className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
-                            />
-                        )}
+                        {/* {formData.disease === 1 && ( */}
+                        <input
+                            type="text"
+                            name="diseaseName"
+                            value={formData.diseaseName}
+                            onChange={handleChange}
+                            placeholder="Enter Disease Details"
+                            className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                        />
+                        {/* )} */}
 
                     </div>
 
                     <div className='col-span-4 md:col-span-5'>
-                        <SearchableSelect
+                        <label className="block text-sm mb-1 text-gray-300">Hospital</label>
+                        {/* <SearchableSelect
                             label="Hospital"
                             options={hospitalData}
-                            value={formData.hospital}
+                            value={1}
                             onChange={
                                 (val) => {
                                     const selected = hospitalData.find(d => d.value === val)
@@ -682,18 +717,18 @@ const HospitalizationClaim = () => {
                             placeholder="Select Hospital"
                             disabled={false}
                             onFocus={(e) => e.target.select()}
-                        />
+                        /> */}
 
-                        {formData.hospital === 1 && (
-                            <input
-                                type="text"
-                                name="hospitalName"
-                                value={formData.hospitalName}
-                                onChange={handleChange}
-                                placeholder="Enter Other Hospital Name"
-                                className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
-                            />
-                        )}
+                        {/* {formData.hospital === 1 && ( */}
+                        <input
+                            type="text"
+                            name="hospitalName"
+                            value={formData.hospitalName}
+                            onChange={handleChange}
+                            placeholder="Enter Hospital Name"
+                            className="mt-2 w-full bg-gray-900/60 border border-gray-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500"
+                        />
+                        {/* )} */}
 
                     </div>
 

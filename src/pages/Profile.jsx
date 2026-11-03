@@ -47,9 +47,10 @@ const ProfilePage = () => {
 
                 if (data?.status === 200) {
                     setAccountData(data?.result)
-                } else {
-                    toast.error(data?.message)
-                }
+                } 
+                // else {
+                //     toast.error(data?.message)
+                // }
             } catch (error) {
                 toast.error(String(error))
             }

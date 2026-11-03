@@ -9,7 +9,6 @@ import Manage from "./pages/Manage";
 import Missing from "./pages/Missing";
 import Swal from "sweetalert2"
 
-import DirectLogin from "./pages/DirectLogin"
 
 const Login = lazy(() => import("./pages/Login"));
 const DashboardLayout = lazy(() => import("./components/DashboardLayout"));
@@ -20,6 +19,8 @@ const ClaimsPage = lazy(() => import("./pages/NewClaim"));
 const FaqPage = lazy(() => import("./pages/Faq"));
 const HealthCarePage = lazy(() => import("./pages/Healthcard"));
 const HospitalPage = lazy(() => import("./pages/Hospitals"));
+const DirectLogin = lazy(() => import("./pages/DirectLogin"));
+const ResellerLogin = lazy(() => import("./pages/ResellerLogin"));
 
 const Skeleton = () => (
   <div className="p-4 animate-pulse space-y-3">
@@ -35,67 +36,82 @@ export default function App() {
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const authChecking = useRef(false);
+  const authCheckPromise = useRef(null);
   const logoutHandled = useRef(false);
   const intervalRef = useRef(null);
   const hadSession = useRef(false);
 
   const checkAuth = async () => {
+    if (authCheckPromise.current) return authCheckPromise.current;
 
-    if (authChecking.current) return;
+    const check = async () => {
+      let lastError;
 
-    authChecking.current = true;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const res = await fetch(
+            "http://localhost:5002/api/grpclaimportal/current-user",
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
 
-    try {
-      const res = await fetch(
-        "http://localhost:5002/api/grpclaimportal/current-user",
-        {
-          method: "GET",
-          credentials: "include",
+          if (res.status === 401) {
+            setUserInfo(null);
+
+            if (hadSession.current && !logoutHandled.current) {
+              logoutHandled.current = true;
+              hadSession.current = false;
+              stopPolling();
+
+              await Swal.fire({
+                icon: "warning",
+                title: "Session Ended",
+                text: "Your session has expired. Please sign in again.",
+                confirmButtonText: "OK",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+              });
+            }
+
+            return false;
+          }
+
+          if (!res.ok) {
+            throw new Error(`Auth check failed with status ${res.status}`);
+          }
+
+          const data = await res.json();
+          const authenticatedUser = data.user_details || null;
+
+          setUserInfo(authenticatedUser);
+
+          if (authenticatedUser) {
+            hadSession.current = true;
+            logoutHandled.current = false;
+          }
+
+          return Boolean(authenticatedUser);
+        } catch (err) {
+          lastError = err;
+          if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+          }
         }
-      );
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
       }
 
-      const data = await res.json();
+      console.warn("Auth check temporarily unavailable:", lastError);
+      return Boolean(userInfo);
+    };
 
-      setUserInfo(data.user_details || null);
-
-      if (data?.user_details) {
-        hadSession.current = true;
-      }
-
-    } catch (err) {
-      console.log(err);
-
-      setUserInfo(null);
-
-      // User was never logged in
-      if (!hadSession.current) {
-        return;
-      }
-
-      if (!logoutHandled.current) {
-
-        logoutHandled.current = true;
-        clearInterval(intervalRef.current);
-
-        await Swal.fire({
-          icon: "warning",
-          title: "Session Ended",
-          text: "Your account has been logged out as your session time is over.",
-          confirmButtonText: "OK",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        });
-      }
-
-    } finally {
-      authChecking.current = false;
+    const promise = check().finally(() => {
+      if (authCheckPromise.current === promise) authCheckPromise.current = null;
       setLoading(false);
-    }
+    });
+
+    authCheckPromise.current = promise;
+    return promise;
   }
 
   useEffect(() => {
@@ -113,7 +129,7 @@ export default function App() {
 
     intervalRef.current = setInterval(() => {
       checkAuth();
-    }, 10000);
+    }, 3000);
 
     return () => {
       clearInterval(intervalRef.current);
@@ -142,9 +158,12 @@ export default function App() {
       const data = await res.json()
 
       if (data?.status === 200) {
+        // localStorage.removeItem("loggedin");
         stopPolling()
         setUserInfo(null)
-        authChecking.current = false;
+        authCheckPromise.current = null;
+        hadSession.current = false;
+        logoutHandled.current = false;
       }
     } catch (error) {
       console.error("Logout failed:", error)
@@ -171,6 +190,11 @@ export default function App() {
             <Route
               path="/groupDirectLogin"
               element={userInfo ? <Navigate to="/dashboard" replace /> : <DirectLogin onLogin={checkAuth} />}
+            />
+
+            <Route
+              path="/groupResellerLogin"
+              element={userInfo ? <Navigate to="/dashboard" replace /> : <ResellerLogin onLogin={checkAuth} />}
             />
 
             {/* <Route

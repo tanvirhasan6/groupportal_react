@@ -1,0 +1,89 @@
+{
+  "folders": [
+    {
+      "name": "GroupClaimPortalFrontend",
+      "path": "."
+    },
+    {
+      "name": "GroupPortalBackend",
+      "path": "../GroupPortalBackend"
+    }
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Group Claim Portal: Frontend",
+        "type": "shell",
+        "command": "node",
+        "args": ["./node_modules/vite/bin/vite.js", "--host", "localhost"],
+        "options": {
+          "cwd": "${workspaceFolder:GroupClaimPortalFrontend}"
+        },
+        "isBackground": true,
+        "problemMatcher": {
+          "owner": "custom",
+          "pattern": {
+            "regexp": "^$"
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".*",
+            "endsPattern": "VITE v.*ready"
+          }
+        },
+        "presentation": {
+          "panel": "dedicated",
+          "reveal": "always"
+        },
+        "runOptions": {
+          "instanceLimit": 1
+        }
+      },
+      {
+        "label": "Group Claim Portal: Backend",
+        "type": "shell",
+        "command": "node",
+        "args": ["./node_modules/nodemon/bin/nodemon.js", "server.js"],
+        "options": {
+          "cwd": "${workspaceFolder:GroupPortalBackend}"
+        },
+        "isBackground": true,
+        "problemMatcher": {
+          "owner": "custom",
+          "pattern": {
+            "regexp": "^$"
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".*",
+            "endsPattern": "Group Portal Server running on http://localhost:5002"
+          }
+        },
+        "presentation": {
+          "panel": "dedicated",
+          "reveal": "always"
+        },
+        "runOptions": {
+          "instanceLimit": 1
+        }
+      },
+      {
+        "label": "Start Group Claim Portal (Frontend + Backend)",
+        "dependsOn": [
+          "Group Claim Portal: Frontend",
+          "Group Claim Portal: Backend"
+        ],
+        "dependsOrder": "parallel",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "runOptions": {
+          "instanceLimit": 1
+        }
+      }
+    ]
+  },
+  "settings": {}
+}
